@@ -1,0 +1,8 @@
+id=WikiDictionary
+name=Wiki Dictionary
+description=Wiki Dictionary provides direct linking to the official Project Zomboid wiki, allowing users to directly access wiki pages relevant to items, vehicles etc.
+poster=preview.png
+authors=SirDoggyJvla
+icon=favicon-128.png
+versionMin=42.0
+modversion=1.0.0
