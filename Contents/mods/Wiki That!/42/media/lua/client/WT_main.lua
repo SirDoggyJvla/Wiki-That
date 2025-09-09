@@ -108,9 +108,15 @@ WT.populateDictionary = function(context, uniqueEntries)
         local pageName = WT.fetchPageName(fullType)
         local option = context:addOption(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
         option.iconTexture = getTexture("favicon-128.png")
+        if not pageName then
+            option.notAvailable = true
+        end
 
         local tooltipObject = WT.getToolTip(entry)
         if tooltipObject then
+            if not pageName then
+                tooltipObject.description = getText("IGUI_WikiThat_NoPage")
+            end
             option.toolTip = tooltipObject
         end
 
@@ -147,13 +153,22 @@ WT.createOptionEntry = function(context, fullType, entry)
     if instanceof(entry,"InventoryItem") then
         icon = entry:getTexture()
     -- elseif instanceof(entry,"Fluid") then
-
     end
 
     -- create option
-    local option = context:addOption(displayName, pageName, WT.openWikiPage)
+    local option
+    if not pageName then
+        option = context:addOption(displayName)
+        tooltip.description = getText("IGUI_WikiThat_NoPage")
+        tooltip.fluid = false
+        option.notAvailable = true
+    else
+        option = context:addOption(displayName, pageName, WT.openWikiPage)
+    end
+
     if icon then option.iconTexture = icon end
     if tooltip then option.toolTip = tooltip end
+    return option
 end
 
 WT.addToolTip = function()
