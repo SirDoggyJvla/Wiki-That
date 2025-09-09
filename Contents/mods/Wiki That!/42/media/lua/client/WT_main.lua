@@ -3,10 +3,14 @@
 
 ---CACHE
 local WT = require "WT_module"
+local ISWikiToolTip = require "ISUI/ISWikiToolTip"
 -- data
 WT.itemDictionary = require "data/WT_items"
 WT.fluidDictionary = require "data/WT_fluids"
 WT.vehicleDictionary = require "data/WT_vehicles"
+-- reset pool
+WT.tooltipPool = {}
+WT.tooltipsUsed = {}
 
 ---@DEBUG
 local function printTable(tbl, maxLvl, _lvl)
@@ -27,6 +31,12 @@ end
 ---@param context ISContextMenu
 ---@param items table
 WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
+    -- wipe tooltip pool
+    for _,tooltip in ipairs(WT.tooltipsUsed) do
+        table.insert(WT.tooltipPool, tooltip)
+    end
+    table.wipe(WT.tooltipsUsed)
+
     local uniqueItems = {}
 
 	for i = 1,#items do
@@ -85,11 +95,6 @@ WT.fetchFluidEntries = function(uniqueEntries)
             fluidType = "Base." .. fluidType
             uniqueEntries[fluidType] = fluid
         end
-
-        -- local pageName = WT.fluidDictionary[fullType]
-        -- if pageName then
-        --     uniqueEntries[fullType] = pageName
-        -- end
     until true end
     return uniqueEntries
 end
@@ -125,10 +130,7 @@ WT.populateDictionary = function(context, uniqueEntries)
     context:addSubMenu(optionMain, subMenu)
 
     for fullType, entry in pairs(uniqueEntries) do
-        print(fullType, " ", entry)
-
         WT.createOptionEntry(subMenu, fullType, entry)
-
     end
 end
 
@@ -144,11 +146,14 @@ end
 WT.createOptionEntry = function(context, fullType, entry)
     local pageName = WT.fetchPageName(fullType)
 
-    local displayName, tooltip, icon = fullType, nil, nil
+    local displayName = entry:getDisplayName()
+    local tooltip = WT.getToolTip(entry)
+
+    local icon = nil
     if instanceof(entry,"InventoryItem") then
-        displayName = entry:getDisplayName()
-        tooltip = WT.getToolTip(entry)
         icon = entry:getTexture()
+    -- elseif instanceof(entry,"Fluid") then
+
     end
 
     -- create option
@@ -157,8 +162,19 @@ WT.createOptionEntry = function(context, fullType, entry)
     if tooltip then option.toolTip = tooltip end
 end
 
+WT.addToolTip = function()
+    local pool = WT.tooltipPool
+    if #pool == 0 then
+        table.insert(pool, ISWikiToolTip:new())
+    end
+    local tooltip = table.remove(pool, #pool)
+    tooltip:reset()
+    table.insert(WT.tooltipsUsed, tooltip)
+    return tooltip
+end
+
 WT.getToolTip = function(entry)
-    local tooltipObject = ISWorldObjectContextMenu.addToolTip()
+    local tooltipObject = WT.addToolTip()
     local valid = false
 
     if instanceof(entry,"InventoryItem") then
@@ -176,6 +192,12 @@ WT.getToolTip = function(entry)
 
         -- draw tooltip
         local s = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n<CENTRE>" .. entry:getDisplayName()
+        tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
+    elseif instanceof(entry,"Fluid") then
+        valid = true
+        tooltipObject.fluid = entry
+
+        local s = "<BR><BR><CENTRE>" .. entry:getDisplayName()
         tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
     end
 
