@@ -156,14 +156,11 @@ WT.createOptionEntry = function(context, fullType, entry)
     end
 
     -- create option
-    local option
+    local option = context:addOption(displayName, pageName, WT.openWikiPage)
     if not pageName then
-        option = context:addOption(displayName)
         tooltip.description = getText("IGUI_WikiThat_NoPage")
         tooltip.fluid = false
         option.notAvailable = true
-    else
-        option = context:addOption(displayName, pageName, WT.openWikiPage)
     end
 
     if icon then option.iconTexture = icon end
