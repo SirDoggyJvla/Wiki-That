@@ -8,8 +8,10 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 local UI_BORDER_SPACING = 10
 local JOYPAD_TEX_SIZE = 32
 
+-- store original
 patch.original_instantiate = MainScreen.instantiate
 
+-- current width
 local btnWidth = UI_BORDER_SPACING*2 + math.max(
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_Details")),
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_NewGame_Mods")),
@@ -19,13 +21,14 @@ local btnWidth = UI_BORDER_SPACING*2 + math.max(
     getTextManager():MeasureStringX(UIFont.Small, "Wiki Dictionary")
 )
 
+-- patched instantiate
 function MainScreen:instantiate()
     patch.original_instantiate(self)
 
-    print("PATCHING MAINSCREEN")
     self:createWDButton()
 end
 
+-- create wiki button
 function MainScreen:createWDButton()
     local buttonH = getDebug() and self.resetLua.y or self.termsOfService.y
     buttonH = buttonH - UI_BORDER_SPACING - self.termsOfService.height
@@ -44,8 +47,8 @@ function MainScreen:createWDButton()
     self.wikiDictionary = wikiDictionary
 end
 
+-- open wiki url
 patch.openWiki = function()
-    print("open wiki")
     local url = patch.url
     if isSteamOverlayEnabled() then
         activateSteamOverlayToWebPage(url)
