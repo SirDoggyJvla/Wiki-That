@@ -13,10 +13,8 @@ def parse_read_to_write(data, r2w):
         _dict_to_lua_table(result, file_path, descriptor=E.get('descriptor', None))
 
 def _download_dictionary():
-    url = "https://github.com/Vaileasys/pz-wiki_parser/blob/main/resources/page_dictionary.json"
-    # Convert GitHub URL to raw content URL
-    raw_url = url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/")
-    response = requests.get(raw_url)
+    url = "https://raw.githubusercontent.com/Vaileasys/pz-wiki_parser/main/resources/page_dictionary.json"
+    response = requests.get(url)
     if response.status_code == 200:
         with open('./scripts/page_dictionary.json', 'w', encoding='utf-8') as f:
             f.write(response.text)
