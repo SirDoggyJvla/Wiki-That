@@ -1,4 +1,5 @@
----@alias url string
+---@alias URL string
+---@alias PageName string
 
 ---CACHE
 local WT = require "WT_module"
@@ -40,13 +41,13 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
     end
 end
 
----
+---Create the context menu option "Wiki That!".
 ---@param context ISContextMenu
 ---@param item InventoryItem
----@param pageName any
+---@param pageName PageName
 WT.createContextMenuOption = function(context, item, pageName)
     local option = context:addOptionOnTop(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
-    option.iconTexture = getTexture("favicon-128.png")
+    option.iconTexture = getTexture("favicon-128.png") -- inside ""
     -- option.iconTexture = item:getTexture()
 
     -- get item texture
@@ -116,15 +117,15 @@ WT.getOptionIndexFromName = function(context, name)
 end
 
 --- Converts a page name to its URL
----@param pageName string
----@return url
+---@param pageName PageName
+---@return URL
 WT.pageNameToUrl = function(pageName)
     return "https://steamcommunity.com/linkfilter/?u=https://pzwiki.net/wiki/" .. pageName
 end
 
 --- Opens the wiki page for a given page name. Checks if the Steam overlay is
 --- activated and used that or use the default browser.
----@param pageName string
+---@param pageName PageName
 WT.openWikiPage = function(pageName)
     local url = WT.pageNameToUrl(pageName)
     if isSteamOverlayEnabled() then
