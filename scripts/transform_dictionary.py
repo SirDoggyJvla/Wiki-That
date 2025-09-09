@@ -56,9 +56,9 @@ def _dict_to_lua_table(d, file_path, descriptor=None):
 if __name__ == "__main__":
     path_to_lua = "Contents/mods/Wiki Dictionary/common/media/lua/shared/data"
     read_to_write = [
-        {"category": "item", "id": "item_id", "file": "WD_items.lua", "descriptor": "Item dictionary"},
-        {"category": "fluid", "id": "fluid_id", "file": "WD_fluids.lua", "descriptor": "Fluid dictionary"},
-        {"category": "vehicle", "id": "vehicle_id", "file": "WD_vehicles.lua", "descriptor": "Vehicle dictionary"},
+        {"category": "item", "id": "item_id", "file": "WT_items.lua", "descriptor": "Item dictionary"},
+        {"category": "fluid", "id": "fluid_id", "file": "WT_fluids.lua", "descriptor": "Fluid dictionary"},
+        {"category": "vehicle", "id": "vehicle_id", "file": "WT_vehicles.lua", "descriptor": "Vehicle dictionary"},
     ]
 
     # https://github.com/Vaileasys/pz-wiki_parser/blob/main/resources/page_dictionary.json

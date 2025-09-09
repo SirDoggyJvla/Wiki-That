@@ -1,3 +1,6 @@
+---@alias url string
+
+---CACHE
 local WT = require "WT_module"
 WT.itemDictionary = require "data/WT_items"
 WT.fluidDictionary = require "data/WT_fluids"
@@ -13,12 +16,11 @@ local function printTable(tbl, lvl)
     end
 end
 
+
 WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
-    print("\n\n\nOnFillInventoryObjectContextMenu")
+    print("\n\nOnFillInventoryObjectContextMenu")
 
-    -- printTable(items)
-
-	for i = 1,#items do repeat
+	for i = 1,#items do
 		-- retrieve the item
 		local item = items[i]
 		if not instanceof(item, "InventoryItem") then
@@ -26,28 +28,31 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
         end
 
         local fullType = item:getFullType()
-        print(fullType)
-        print(WT.itemDictionary[fullType])
 
         local pageName = WT.itemDictionary[fullType]
-        if not pageName then break end
+        if pageName then
+            local option = context:addOption("Wiki That!", pageName, WT.openWikiPage)
+            option.iconTexture = getTexture("favicon-128.png")
 
-        local option = context:addOption("Open wiki", pageName, WT.openWikiPage)
-        option.iconTexture = getTexture("favicon-128.png")
-
-        local tooltipObject = ISWorldObjectContextMenu.addToolTip()
-        tooltipObject.description = "Open the wiki page for " .. pageName
-        option.toolTip = tooltipObject
-    until true end
+            local tooltipObject = ISWorldObjectContextMenu.addToolTip()
+            tooltipObject.description = "Open the wiki page for " .. pageName
+            option.toolTip = tooltipObject
+        end
+    end
 end
 
+--- Converts a page name to its URL
+---@param pageName string
+---@return url
+WT.pageNameToUrl = function(pageName)
+    return "https://steamcommunity.com/linkfilter/?u=https://pzwiki.net/wiki/" .. pageName
+end
 
+--- Opens the wiki page for a given page name. Checks if the Steam overlay is
+--- activated and used that or use the default browser.
+---@param pageName string
 WT.openWikiPage = function(pageName)
-    if type(pageName) ~= "string" then return end
-    local url = "https://steamcommunity.com/linkfilter/?u=https://pzwiki.net/wiki/"
-    url = url .. pageName
-    print(url)
-
+    local url = WT.pageNameToUrl(pageName)
     if isSteamOverlayEnabled() then
         activateSteamOverlayToWebPage(url)
     else
