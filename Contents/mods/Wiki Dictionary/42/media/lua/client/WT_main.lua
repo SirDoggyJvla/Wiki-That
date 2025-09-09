@@ -40,6 +40,10 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
     end
 end
 
+---
+---@param context ISContextMenu
+---@param item InventoryItem
+---@param pageName any
 WT.createContextMenuOption = function(context, item, pageName)
     local option = context:addOptionOnTop(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
     option.iconTexture = getTexture("favicon-128.png")
@@ -49,7 +53,7 @@ WT.createContextMenuOption = function(context, item, pageName)
     local texture = item:getTexture()
     local width = texture:getWidth()
     local height = texture:getHeight()
-    texture = string.gsub(texture:getName(), "^.*media", "media")
+    local texturePath = string.gsub(texture:getName(), "^.*media", "media")
 
     -- find proper texture size for the tooltip
     local ratio = width/height
@@ -58,15 +62,16 @@ WT.createContextMenuOption = function(context, item, pageName)
 
     -- draw tooltip
     local tooltipObject = ISWorldObjectContextMenu.addToolTip()
-    local s = "\n\n<IMAGECENTRE:"..texture..","..width..","..height..">\n<CENTRE>" .. item:getDisplayName()
+    local s = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n<CENTRE>" .. item:getDisplayName()
     tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
     option.toolTip = tooltipObject
 end
 
 -- hook to render
-require "ISContextMenu"
 WT.originalRender = ISContextMenu.render
 
+---Adjust the context menu option border and background color
+---@param self table
 WT.renderOptionHook = function(self)
     WT.originalRender(self)
 
@@ -79,13 +84,13 @@ WT.renderOptionHook = function(self)
         self:drawRectBorder(0, y, self.width, self.itemHgt, 0.2, 1, 0, 0)
     end
 end
-ISContextMenu.render = WT.renderOptionHook
+ISContextMenu.render = WT.renderOptionHook -- replace original with our hook
 
----comment
+---Finds the start y coordinates used to render the context menu options borders and backgrounds
 ---@param context ISContextMenu
 ---@return integer
 WT.getStartY = function(context)
-    local y = context.padTopBottom;
+    local y = context.padTopBottom
 	local dy = 0
 	if context:getScrollHeight() > context:getScrollAreaHeight() then
 		dy = context.scrollIndicatorHgt
@@ -94,13 +99,13 @@ WT.getStartY = function(context)
     return y
 end
 
----comment
+---Find the context menu option with specified `name` and return its index position and the option table
 ---@param context ISContextMenu
 ---@param name string
 ---@return integer|nil
 ---@return table|nil
 WT.getOptionIndexFromName = function(context, name)
-    local options = context.options
+    local options = context.options -- context menu options
     for i=1,#options do
         local option = options[i]
         if option.name == name then

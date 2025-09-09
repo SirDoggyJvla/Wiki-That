@@ -25,12 +25,14 @@ local btnWidth = UI_BORDER_SPACING*2 + math.max(
 function MainScreen:instantiate()
     patch.original_instantiate(self)
 
-    self:createWTButton()
+    if not self.inGame then
+        self:createWTButton()
+    end
 end
 
 -- create wiki button
 function MainScreen:createWTButton()
-    local buttonH = getDebug() and self.resetLua.y or self.termsOfService.y
+    local buttonH = getDebug() and self.resetLua and self.resetLua.y or self.termsOfService.y
     buttonH = buttonH - UI_BORDER_SPACING - self.termsOfService.height
 
     -- create wiki button
