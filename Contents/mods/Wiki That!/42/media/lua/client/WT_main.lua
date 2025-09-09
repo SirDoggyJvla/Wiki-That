@@ -48,12 +48,6 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 
         local fullType = item:getFullType()
         uniqueItems[fullType] = item
-
-        -- local pageName = WT.itemDictionary[fullType]
-        -- if pageName then
-        --     WT.createContextMenuOption(context, item, pageName)
-        --     return
-        -- end
     end
 
     local uniqueEntries = WT.fetchFluidEntries(uniqueItems)
@@ -112,7 +106,7 @@ WT.populateDictionary = function(context, uniqueEntries)
         end
 
         local pageName = WT.fetchPageName(fullType)
-        local option = context:addOptionOnTop(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
+        local option = context:addOption(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
         option.iconTexture = getTexture("favicon-128.png")
 
         local tooltipObject = WT.getToolTip(entry)
@@ -124,7 +118,7 @@ WT.populateDictionary = function(context, uniqueEntries)
     end
 
     -- main option
-    local optionMain = context:addOptionOnTop(getText("IGUI_WikiThat"))
+    local optionMain = context:addOption(getText("IGUI_WikiThat"))
     optionMain.iconTexture = getTexture("favicon-128.png")
     local subMenu = context:getNew(context)
     context:addSubMenu(optionMain, subMenu)
@@ -202,33 +196,6 @@ WT.getToolTip = function(entry)
     end
 
     return valid and tooltipObject or nil
-end
-
----Create the context menu option "Wiki That!".
----@param context ISContextMenu
----@param item InventoryItem
----@param pageName PageName
-WT.createContextMenuOption = function(context, item, pageName)
-    local option = context:addOptionOnTop(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
-    option.iconTexture = getTexture("favicon-128.png")
-    -- option.iconTexture = item:getTexture()
-
-    -- get item texture
-    local texture = item:getTexture()
-    local width = texture:getWidth()
-    local height = texture:getHeight()
-    local texturePath = string.gsub(texture:getName(), "^.*media", "media")
-
-    -- find proper texture size for the tooltip
-    local ratio = width/height
-    height = 40 -- fixed height
-    width = height*ratio -- adjust width
-
-    -- draw tooltip
-    local tooltipObject = ISWorldObjectContextMenu.addToolTip()
-    local s = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n<CENTRE>" .. item:getDisplayName()
-    tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
-    option.toolTip = tooltipObject
 end
 
 -- hook to render
