@@ -1,5 +1,6 @@
 import json
 import os
+import requests
 
 def parse_read_to_write(data, r2w):
     for E in r2w:
@@ -10,6 +11,17 @@ def parse_read_to_write(data, r2w):
         result = _read_json_entry(data, category, id_field)
         file_path = os.path.join(path_to_lua, file_name)
         _dict_to_lua_table(result, file_path, descriptor=E.get('descriptor', None))
+
+def _download_dictionary():
+    url = "https://github.com/Vaileasys/pz-wiki_parser/blob/main/resources/page_dictionary.json"
+    # Convert GitHub URL to raw content URL
+    raw_url = url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/")
+    response = requests.get(raw_url)
+    if response.status_code == 200:
+        with open('./scripts/page_dictionary.json', 'w', encoding='utf-8') as f:
+            f.write(response.text)
+    else:
+        raise Exception(f"Failed to download file: {response.status_code}")
 
 def _read_json_entry(data, category, id_field):
     result = {}
@@ -62,6 +74,7 @@ if __name__ == "__main__":
     ]
 
     # https://github.com/Vaileasys/pz-wiki_parser/blob/main/resources/page_dictionary.json
+    _download_dictionary()
     with open('./scripts/page_dictionary.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
