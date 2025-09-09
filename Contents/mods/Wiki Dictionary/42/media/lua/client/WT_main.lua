@@ -6,12 +6,15 @@ WT.itemDictionary = require "data/WT_items"
 WT.fluidDictionary = require "data/WT_fluids"
 WT.vehicleDictionary = require "data/WT_vehicles"
 
-local function printTable(tbl, lvl)
-    lvl = lvl or 0
+local function printTable(tbl, maxLvl, _lvl)
+    if type(tbl) ~= "table" then print("not a table") return end
+    _lvl = _lvl or 0
+    maxLvl = maxLvl or 2
     for k, v in pairs(tbl) do
-        print(string.rep(" ", lvl * 4) .. k, v)
-        if type(v) == "table" and lvl < 1 then
-            printTable(v, lvl + 1)
+        DebugLog.log(string.rep(" ", _lvl * 4) .. tostring(k) .. " " .. tostring(v))
+        -- DebugLog.log(tostring(k))
+        if type(v) == "table" and _lvl < maxLvl then
+            printTable(v, maxLvl, _lvl + 1)
         end
     end
 end
@@ -31,14 +34,80 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 
         local pageName = WT.itemDictionary[fullType]
         if pageName then
-            local option = context:addOption("Wiki That!", pageName, WT.openWikiPage)
-            option.iconTexture = getTexture("favicon-128.png")
-
-            local tooltipObject = ISWorldObjectContextMenu.addToolTip()
-            tooltipObject.description = "Open the wiki page for " .. pageName
-            option.toolTip = tooltipObject
+            WT.createContextMenuOption(context, item, pageName)
+            return
         end
     end
+end
+
+WT.createContextMenuOption = function(context, item, pageName)
+    local option = context:addOptionOnTop(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
+    option.iconTexture = getTexture("favicon-128.png")
+    -- option.iconTexture = item:getTexture()
+
+    -- get item texture
+    local texture = item:getTexture()
+    local width = texture:getWidth()
+    local height = texture:getHeight()
+    texture = string.gsub(texture:getName(), "^.*media", "media")
+
+    -- find proper texture size for the tooltip
+    local ratio = width/height
+    height = 40 -- fixed height
+    width = height*ratio -- adjust width
+
+    -- draw tooltip
+    local tooltipObject = ISWorldObjectContextMenu.addToolTip()
+    local s = "\n\n<IMAGECENTRE:"..texture..","..width..","..height..">\n<CENTRE>" .. item:getDisplayName()
+    tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
+    option.toolTip = tooltipObject
+end
+
+-- hook to render
+require "ISContextMenu"
+WT.originalRender = ISContextMenu.render
+
+WT.renderOptionHook = function(self)
+    WT.originalRender(self)
+
+    local i, option = WT.getOptionIndexFromName(self, getText("IGUI_WikiThat"))
+    if option then
+        local y = WT.getStartY(self)
+        y = y + self.itemHgt*(i-1)
+
+        self:drawRect(0, y, self.width, self.itemHgt, 0.1, 1, 0.6, 0)
+        self:drawRectBorder(0, y, self.width, self.itemHgt, 0.2, 1, 0, 0)
+    end
+end
+ISContextMenu.render = WT.renderOptionHook
+
+---comment
+---@param context ISContextMenu
+---@return integer
+WT.getStartY = function(context)
+    local y = context.padTopBottom;
+	local dy = 0
+	if context:getScrollHeight() > context:getScrollAreaHeight() then
+		dy = context.scrollIndicatorHgt
+		y = y + dy
+	end
+    return y
+end
+
+---comment
+---@param context ISContextMenu
+---@param name string
+---@return integer|nil
+---@return table|nil
+WT.getOptionIndexFromName = function(context, name)
+    local options = context.options
+    for i=1,#options do
+        local option = options[i]
+        if option.name == name then
+            return i,option
+        end
+    end
+    return nil, nil
 end
 
 --- Converts a page name to its URL

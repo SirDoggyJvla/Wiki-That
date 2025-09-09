@@ -18,7 +18,7 @@ local btnWidth = UI_BORDER_SPACING*2 + math.max(
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_TermsOfService_MainMenu")),
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_ResetLua")),
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_ReportBug")),
-    getTextManager():MeasureStringX(UIFont.Small, "Wiki That!")
+    getTextManager():MeasureStringX(UIFont.Small, getText("UI_WikiThat"))
 )
 
 -- patched instantiate
@@ -34,7 +34,7 @@ function MainScreen:createWTButton()
     buttonH = buttonH - UI_BORDER_SPACING - self.termsOfService.height
 
     -- create wiki button
-    local wikiDictionary = ISButton:new(self.width - btnWidth - UI_BORDER_SPACING*4, buttonH, btnWidth, BUTTON_HGT, "Wiki Dictionary", self, patch.openWiki)
+    local wikiDictionary = ISButton:new(self.width - btnWidth - UI_BORDER_SPACING*4, buttonH, btnWidth, BUTTON_HGT, getText("UI_WikiThat"), self, patch.openWiki)
     wikiDictionary:initialise()
     wikiDictionary.borderColor = {r=1, g=0, b=0, a=1}
     wikiDictionary.backgroundColor = {r=1, g=0, b=0, a=0.5}
@@ -50,6 +50,8 @@ end
 -- open wiki url
 patch.openWiki = function()
     local url = patch.url
+    -- TODO: the following link is whitelisted, so maybe ask for a redirect to the wiki ?
+    -- url = "https://projectzomboid.com/blog/"
     if isSteamOverlayEnabled() then
         activateSteamOverlayToWebPage(url)
     else
