@@ -3,10 +3,12 @@
 
 ---CACHE
 local WT = require "WT_module"
+-- data
 WT.itemDictionary = require "data/WT_items"
 WT.fluidDictionary = require "data/WT_fluids"
 WT.vehicleDictionary = require "data/WT_vehicles"
 
+---@DEBUG
 local function printTable(tbl, maxLvl, _lvl)
     if type(tbl) ~= "table" then print("not a table") return end
     _lvl = _lvl or 0
@@ -20,9 +22,12 @@ local function printTable(tbl, maxLvl, _lvl)
     end
 end
 
-
+---Add a single context menu option "Wiki That!" to the inventory context menu.
+---@param playerIndex integer
+---@param context ISContextMenu
+---@param items table
 WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
-    print("\n\nOnFillInventoryObjectContextMenu")
+    local uniqueItems = {}
 
 	for i = 1,#items do
 		-- retrieve the item
@@ -32,13 +37,149 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
         end
 
         local fullType = item:getFullType()
+        uniqueItems[fullType] = item
 
-        local pageName = WT.itemDictionary[fullType]
-        if pageName then
-            WT.createContextMenuOption(context, item, pageName)
-            return
+        -- local pageName = WT.itemDictionary[fullType]
+        -- if pageName then
+        --     WT.createContextMenuOption(context, item, pageName)
+        --     return
+        -- end
+    end
+
+    local uniqueEntries = WT.fetchFluidEntries(uniqueItems)
+    WT.populateDictionary(context, uniqueEntries)
+end
+
+---Utility to count entries in a dictionary (key-table).
+local lenDict = function(dict)
+    local i = 0
+    for _,_ in pairs(dict) do
+        i = i + 1
+    end
+    return i
+end
+
+WT.getFluidsInFluidContainer = function(fluidContainer)
+    local fluidLog = {}
+    local fluids = Fluid.getAllFluids();
+    for i=0,fluids:size()-1 do
+        local fluid = fluids:get(i);
+        local amount = fluidContainer:getSpecificFluidAmount(fluid)
+        if amount > 0 then
+            fluidLog[fluid:getFluidTypeString()] = fluid
         end
     end
+    return fluidLog
+end
+
+---comment
+---@param uniqueEntries table
+---@return table
+WT.fetchFluidEntries = function(uniqueEntries)
+    for _, item in pairs(uniqueEntries) do repeat
+        local fluidContainer = item:getFluidContainerFromSelfOrWorldItem()
+        if not fluidContainer then break end
+
+        local fluidLog = WT.getFluidsInFluidContainer(fluidContainer)
+        for fluidType, fluid in pairs(fluidLog) do
+            fluidType = "Base." .. fluidType
+            uniqueEntries[fluidType] = fluid
+        end
+
+        -- local pageName = WT.fluidDictionary[fullType]
+        -- if pageName then
+        --     uniqueEntries[fullType] = pageName
+        -- end
+    until true end
+    return uniqueEntries
+end
+
+WT.populateDictionary = function(context, uniqueEntries)
+    local entryCount = lenDict(uniqueEntries)
+    if entryCount <= 0 then return end -- skip since nothing to add
+
+    -- handle single entry case
+    if entryCount == 1 then
+        -- access unique option informations
+        local fullType, entry
+        for k,v in pairs(uniqueEntries) do
+            fullType, entry = k,v
+        end
+
+        local pageName = WT.fetchPageName(fullType)
+        local option = context:addOptionOnTop(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
+        option.iconTexture = getTexture("favicon-128.png")
+
+        local tooltipObject = WT.getToolTip(entry)
+        if tooltipObject then
+            option.toolTip = tooltipObject
+        end
+
+        return
+    end
+
+    -- main option
+    local optionMain = context:addOptionOnTop(getText("IGUI_WikiThat"))
+    optionMain.iconTexture = getTexture("favicon-128.png")
+    local subMenu = context:getNew(context)
+    context:addSubMenu(optionMain, subMenu)
+
+    for fullType, entry in pairs(uniqueEntries) do
+        print(fullType, " ", entry)
+
+        WT.createOptionEntry(subMenu, fullType, entry)
+
+    end
+end
+
+
+WT.fetchPageName = function(fullType)
+    -- data
+    local itemDictionary = WT.itemDictionary
+    local fluidDictionary = WT.fluidDictionary
+
+    return itemDictionary[fullType] or fluidDictionary[fullType] or nil
+end
+
+WT.createOptionEntry = function(context, fullType, entry)
+    local pageName = WT.fetchPageName(fullType)
+
+    local displayName, tooltip, icon = fullType, nil, nil
+    if instanceof(entry,"InventoryItem") then
+        displayName = entry:getDisplayName()
+        tooltip = WT.getToolTip(entry)
+        icon = entry:getTexture()
+    end
+
+    -- create option
+    local option = context:addOption(displayName, pageName, WT.openWikiPage)
+    if icon then option.iconTexture = icon end
+    if tooltip then option.toolTip = tooltip end
+end
+
+WT.getToolTip = function(entry)
+    local tooltipObject = ISWorldObjectContextMenu.addToolTip()
+    local valid = false
+
+    if instanceof(entry,"InventoryItem") then
+        valid = true
+        -- get item texture
+        local texture = entry:getTexture()
+        local width = texture:getWidth()
+        local height = texture:getHeight()
+        local texturePath = string.gsub(texture:getName(), "^.*media", "media")
+
+        -- find proper texture size for the tooltip
+        local ratio = width/height
+        height = 40 -- fixed height
+        width = height*ratio -- adjust width
+
+        -- draw tooltip
+        local s = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n<CENTRE>" .. entry:getDisplayName()
+        tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
+    end
+
+    return valid and tooltipObject or nil
 end
 
 ---Create the context menu option "Wiki That!".
@@ -47,7 +188,7 @@ end
 ---@param pageName PageName
 WT.createContextMenuOption = function(context, item, pageName)
     local option = context:addOptionOnTop(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
-    option.iconTexture = getTexture("favicon-128.png") -- inside ""
+    option.iconTexture = getTexture("favicon-128.png")
     -- option.iconTexture = item:getTexture()
 
     -- get item texture
@@ -127,6 +268,7 @@ end
 --- activated and used that or use the default browser.
 ---@param pageName PageName
 WT.openWikiPage = function(pageName)
+    if not pageName then return end
     local url = WT.pageNameToUrl(pageName)
     if isSteamOverlayEnabled() then
         activateSteamOverlayToWebPage(url)
