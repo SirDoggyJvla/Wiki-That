@@ -1,7 +1,7 @@
-local WD = require "WD_module"
-WD.itemDictionary = require "data/WD_items"
-WD.fluidDictionary = require "data/WD_fluids"
-WD.vehicleDictionary = require "data/WD_vehicles"
+local WT = require "WT_module"
+WT.itemDictionary = require "data/WT_items"
+WT.fluidDictionary = require "data/WT_fluids"
+WT.vehicleDictionary = require "data/WT_vehicles"
 
 local function printTable(tbl, lvl)
     lvl = lvl or 0
@@ -13,7 +13,7 @@ local function printTable(tbl, lvl)
     end
 end
 
-WD.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
+WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
     print("\n\n\nOnFillInventoryObjectContextMenu")
 
     -- printTable(items)
@@ -27,12 +27,12 @@ WD.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 
         local fullType = item:getFullType()
         print(fullType)
-        print(WD.itemDictionary[fullType])
+        print(WT.itemDictionary[fullType])
 
-        local pageName = WD.itemDictionary[fullType]
+        local pageName = WT.itemDictionary[fullType]
         if not pageName then break end
 
-        local option = context:addOption("Open wiki", pageName, WD.openWikiPage)
+        local option = context:addOption("Open wiki", pageName, WT.openWikiPage)
         option.iconTexture = getTexture("favicon-128.png")
 
         local tooltipObject = ISWorldObjectContextMenu.addToolTip()
@@ -42,7 +42,7 @@ WD.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 end
 
 
-WD.openWikiPage = function(pageName)
+WT.openWikiPage = function(pageName)
     if type(pageName) ~= "string" then return end
     local url = "https://steamcommunity.com/linkfilter/?u=https://pzwiki.net/wiki/"
     url = url .. pageName

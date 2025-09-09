@@ -1,3 +1,0 @@
-local WD = {}
-
-return WD

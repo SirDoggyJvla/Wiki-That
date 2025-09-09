@@ -18,18 +18,18 @@ local btnWidth = UI_BORDER_SPACING*2 + math.max(
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_TermsOfService_MainMenu")),
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_ResetLua")),
     getTextManager():MeasureStringX(UIFont.Small, getText("UI_ReportBug")),
-    getTextManager():MeasureStringX(UIFont.Small, "Wiki Dictionary")
+    getTextManager():MeasureStringX(UIFont.Small, "Wiki That!")
 )
 
 -- patched instantiate
 function MainScreen:instantiate()
     patch.original_instantiate(self)
 
-    self:createWDButton()
+    self:createWTButton()
 end
 
 -- create wiki button
-function MainScreen:createWDButton()
+function MainScreen:createWTButton()
     local buttonH = getDebug() and self.resetLua.y or self.termsOfService.y
     buttonH = buttonH - UI_BORDER_SPACING - self.termsOfService.height
 
