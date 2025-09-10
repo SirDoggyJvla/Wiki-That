@@ -7,8 +7,9 @@ def parse_read_to_write(data, r2w):
         category = E['category']
         id_field = E['id']
         file_name = E['file']
+        second_id = E.get('second_id', None)
         print(f"Processing category '{category}' with id field '{id_field}' into file '{file_name}'")
-        result = _read_json_entry(data, category, id_field)
+        result = _read_json_entry(data, category, id_field, second_id)
         file_path = os.path.join(path_to_lua, file_name)
         _dict_to_lua_table(result, file_path, descriptor=E.get('descriptor', None))
 
@@ -21,13 +22,19 @@ def _download_dictionary():
     else:
         raise Exception(f"Failed to download file: {response.status_code}")
 
-def _read_json_entry(data, category, id_field):
+def _read_json_entry(data, category, id_field, second_id=None):
     result = {}
     for page_name, entry in data.get(category, {}).items():
         id = entry.get(id_field)
         if id:
             for i in id:
-                result[i] = page_name
+                if second_id is None:
+                    result[i] = page_name
+                else:
+                    for s in entry.get(second_id, []):
+                        kwargs = {second_id: s}
+                        formated_id = i.format(**kwargs)
+                        result[formated_id] = page_name
     return result
 
 def _dict_to_lua_table(d, file_path, descriptor=None):
@@ -64,11 +71,12 @@ def _dict_to_lua_table(d, file_path, descriptor=None):
 
 
 if __name__ == "__main__":
-    path_to_lua = "Contents/mods/Wiki Dictionary/common/media/lua/shared/data"
+    path_to_lua = "Contents/mods/Wiki That!/common/media/lua/shared/data"
     read_to_write = [
         {"category": "item", "id": "item_id", "file": "WT_items.lua", "descriptor": "Item dictionary"},
         {"category": "fluid", "id": "fluid_id", "file": "WT_fluids.lua", "descriptor": "Fluid dictionary"},
         {"category": "vehicle", "id": "vehicle_id", "file": "WT_vehicles.lua", "descriptor": "Vehicle dictionary"},
+        {"category": "tile", "id": "item_id", "second_id": "sprite_id", "file": "WT_moveables.lua", "descriptor": "Moveable dictionary"},
     ]
 
     # https://github.com/Vaileasys/pz-wiki_parser/blob/main/resources/page_dictionary.json

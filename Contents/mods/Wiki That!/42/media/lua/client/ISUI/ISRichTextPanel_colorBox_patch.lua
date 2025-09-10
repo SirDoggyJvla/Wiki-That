@@ -31,23 +31,19 @@ function ISRichTextPanel:processCommand(command, x, y, lineImageHeight, lineHeig
         self.colorbox = self.colorbox or {} -- init
 
         if(x + w >= self.width - (self.marginLeft + self.marginRight)) then
-            x = 0;
-            y = y +  lineHeight;
+            x = 0
+            y = y + lineHeight
         end
 
         if(lineImageHeight < (h / 2) + 8) then
-            lineImageHeight = (h / 2) + 16;
+            lineImageHeight = (h / 2) + 16
         end
 
         local mx = (self.width - self.marginLeft - self.marginRight) / 2
         local entry = {
-            x=mx - (w/2),
-            y=y,
-            w=w,
-            h=h,
-            r=r,
-            g=g,
-            b=b,
+            x=mx - (w/2), y=y,
+            w=w, h=h,
+            r=r, g=g, b=b,
         }
         table.insert(self.colorbox, entry)
 

@@ -7,6 +7,7 @@ local WT = require "WT_module"
 WT.itemDictionary = require "data/WT_items"
 WT.fluidDictionary = require "data/WT_fluids"
 WT.vehicleDictionary = require "data/WT_vehicles"
+WT.moveableDictionary = require "data/WT_moveables"
 -- reset pool
 WT.tooltipPool = {}
 WT.tooltipsUsed = {}
@@ -104,7 +105,7 @@ WT.populateDictionary = function(context, uniqueEntries)
             fullType, entry = k,v
         end
 
-        local pageName = WT.fetchPageName(fullType)
+        local pageName = WT.fetchPageName(fullType, entry)
         local option = context:addOption(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
         option.iconTexture = getTexture("favicon-128.png")
         if not pageName then
@@ -134,16 +135,23 @@ WT.populateDictionary = function(context, uniqueEntries)
 end
 
 
-WT.fetchPageName = function(fullType)
+WT.fetchPageName = function(fullType, entry)
     -- data
-    local itemDictionary = WT.itemDictionary
-    local fluidDictionary = WT.fluidDictionary
-
-    return itemDictionary[fullType] or fluidDictionary[fullType] or nil
+    if instanceof(entry,"Moveable") then
+        local moveableDictionary = WT.moveableDictionary
+        return moveableDictionary[fullType]
+    elseif instanceof(entry,"InventoryItem") then
+        local itemDictionary = WT.itemDictionary
+        return itemDictionary[fullType]
+    elseif instanceof(entry,"Fluid") then
+        local fluidDictionary = WT.fluidDictionary
+        return fluidDictionary[fullType]
+    end
+    return nil
 end
 
 WT.createOptionEntry = function(context, fullType, entry)
-    local pageName = WT.fetchPageName(fullType)
+    local pageName = WT.fetchPageName(fullType, entry)
 
     local displayName = entry:getDisplayName()
     local tooltip = WT.getToolTip(entry)
@@ -158,7 +166,6 @@ WT.createOptionEntry = function(context, fullType, entry)
     local option = context:addOption(displayName, pageName, WT.openWikiPage)
     if not pageName then
         tooltip.description = getText("IGUI_WikiThat_NoPage")
-        tooltip.fluid = false
         option.notAvailable = true
     end
 
@@ -174,7 +181,9 @@ WT.getToolTip = function(entry)
     local tooltipObject = ISWorldObjectContextMenu.addToolTip()
     local valid = false
 
+    -- inventory item
     if instanceof(entry,"InventoryItem") then
+        ---@cast entry InventoryItem
         valid = true
         -- get item texture
         local texture = entry:getTexture()
@@ -188,12 +197,14 @@ WT.getToolTip = function(entry)
         width = height*ratio -- adjust width
 
         -- draw tooltip
+        print(texturePath)
         local s = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n<CENTRE>" .. entry:getDisplayName()
         tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
-    elseif instanceof(entry,"Fluid") then
-        valid = true
-        tooltipObject.fluid = entry
 
+    -- fluid
+    elseif instanceof(entry,"Fluid") then
+        ---@cast entry Fluid
+        valid = true
         -- fluid color tooltip
         local color = entry:getColor()
         local r,g,b = color:getRedFloat(), color:getGreenFloat(), color:getBlueFloat()
