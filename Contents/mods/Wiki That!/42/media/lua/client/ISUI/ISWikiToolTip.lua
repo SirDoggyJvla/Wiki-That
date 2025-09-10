@@ -1,6 +1,7 @@
 local ISWikiToolTip = ISToolTip:derive("ISWikiToolTip") ---@class ISWikiToolTip : ISToolTip
 
 ---CACHE
+local WT = require "WT_module"
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 -- local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 
@@ -37,7 +38,8 @@ function ISWikiToolTip:render()
 	end
 
 	-- big rectangle (our background)
-	self:drawRect(0, 0, self.width, self.height, 0.1, 1, 0.6, 0.05)
+	local backgroundColor = self.backgroundColor
+	self:drawRect(0, 0, self.width, self.height, backgroundColor.a, backgroundColor.r, backgroundColor.g, backgroundColor.b)
     local borderColor = self.borderColor
 	self:drawRectBorder(0, 0, self.width, self.height, borderColor.a, borderColor.r, borderColor.g, borderColor.b)
 
@@ -62,6 +64,7 @@ function ISWikiToolTip:render()
 		self:drawTextCentre(self.footNote, self:getWidth() / 2, self:getHeight() - fontHgt - 4, 1, 1, 1, 1, UIFont.Small)
 	end
 
+	--- DRAW FLUID BOX
     local fluid = self.fluid
     if fluid then
         -- find center
@@ -77,12 +80,12 @@ function ISWikiToolTip:render()
     end
 end
 
-local function setRGBA(rgba, r, g, b, a)
-    rgba.r = r
-    rgba.g = g
-    rgba.b = b
-    rgba.a = a
-    return rgba
+local function copyTbl(tbl)
+	local t = {}
+	for k,v in pairs(tbl) do
+		t[k] = v
+	end
+	return t
 end
 
 ISWikiToolTip.originalReset = ISWikiToolTip.reset
@@ -91,22 +94,24 @@ function ISWikiToolTip:reset()
 
     self.fluid = nil
 
-    setRGBA(self.borderColor, 1, 0, 0, 0.2)
-    setRGBA(self.backgroundColor, 1, 0.6, 0, 0.1)
+	-- override previously set border and background colors
+	self.borderColor = copyTbl(WT.backgroundColor_highlight)
+	self.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 
-    setRGBA(self.descriptionPanel.borderColor, 1, 0, 0, 0.2)
-    setRGBA(self.descriptionPanel.backgroundColor, 1, 0.6, 0, 0.1)
+	self.descriptionPanel.borderColor = copyTbl(WT.backgroundColor_highlight)
+	self.descriptionPanel.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 end
 
 ISWikiToolTip.originalNew = ISWikiToolTip.new
 function ISWikiToolTip:new()
     local o = ISWikiToolTip.originalNew(self)
 
-    o.borderColor = {r=1, g=0, b=0, a=0.2}
-    o.backgroundColor = {r=1, g=0.6, b=0, a=0.1}
+	-- set colors
+	o.borderColor = copyTbl(WT.backgroundColor_highlight)
+	o.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 
-    o.descriptionPanel.borderColor = {r=1, g=0, b=0, a=0.2}
-    o.descriptionPanel.backgroundColor = {r=1, g=0.6, b=0, a=0.1}
+	o.descriptionPanel.borderColor = copyTbl(WT.backgroundColor_highlight)
+	o.descriptionPanel.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 
     return o
 end
