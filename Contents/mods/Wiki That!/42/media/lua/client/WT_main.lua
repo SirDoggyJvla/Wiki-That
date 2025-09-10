@@ -197,7 +197,7 @@ WT.getToolTip = function(entry)
         width = height*ratio -- adjust width
 
         -- draw tooltip
-        print(texturePath)
+        ---@FIXME sometimes the texture is just empty for moveables in certain directions (Red Oak Chair)
         local s = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n<CENTRE>" .. entry:getDisplayName()
         tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
 
