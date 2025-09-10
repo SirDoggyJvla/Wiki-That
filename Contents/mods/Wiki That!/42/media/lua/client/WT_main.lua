@@ -93,6 +93,9 @@ WT.fetchFluidEntries = function(uniqueEntries)
     return uniqueEntries
 end
 
+---Populate the context menu with Wiki That for entries from the dictionaries.
+---@param context ISContextMenu
+---@param uniqueEntries table
 WT.populateDictionary = function(context, uniqueEntries)
     local entryCount = lenDict(uniqueEntries)
     if entryCount <= 0 then return end -- skip since nothing to add
@@ -146,6 +149,9 @@ WT.fetchPageName = function(fullType, entry)
     elseif instanceof(entry,"Fluid") then
         local fluidDictionary = WT.fluidDictionary
         return fluidDictionary[fullType]
+    elseif instanceof(entry,"BaseVehicle") then
+        local vehicleDictionary = WT.vehicleDictionary
+        return vehicleDictionary[fullType]
     end
     return nil
 end
@@ -175,7 +181,7 @@ WT.createOptionEntry = function(context, fullType, entry)
 end
 
 ---comment
----@param entry InventoryItem|Fluid
+---@param entry InventoryItem|Fluid|BaseVehicle
 ---@return ISToolTip|nil
 WT.getToolTip = function(entry)
     local tooltipObject = ISWorldObjectContextMenu.addToolTip()
@@ -211,6 +217,17 @@ WT.getToolTip = function(entry)
         local w,h = 50,50
 
         local s = "<FLUIDBOXCENTRE:"..w..","..h..","..r..","..g..","..b..">\n<CENTRE>" .. entry:getDisplayName()
+        tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
+
+    -- vehicle
+    elseif instanceof(entry,"BaseVehicle") then
+        ---@cast entry BaseVehicle
+        valid = true
+        local script = entry:getScript()
+        local carName = script:getCarModelName() or script:getName()
+        local name = getText("IGUI_VehicleName" .. carName)
+        -- draw tooltip
+        local s = "<CENTRE>" .. name
         tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
     end
 
