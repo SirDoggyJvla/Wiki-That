@@ -3,7 +3,6 @@
 
 ---CACHE
 local WT = require "WT_module"
-local ISWikiToolTip = require "ISUI/ISWikiToolTip"
 -- data
 WT.itemDictionary = require "data/WT_items"
 WT.fluidDictionary = require "data/WT_fluids"
@@ -168,19 +167,11 @@ WT.createOptionEntry = function(context, fullType, entry)
     return option
 end
 
-WT.addToolTip = function()
-    local pool = WT.tooltipPool
-    if #pool == 0 then
-        table.insert(pool, ISWikiToolTip:new())
-    end
-    local tooltip = table.remove(pool, #pool)
-    tooltip:reset()
-    table.insert(WT.tooltipsUsed, tooltip)
-    return tooltip
-end
-
+---comment
+---@param entry InventoryItem|Fluid
+---@return ISToolTip|nil
 WT.getToolTip = function(entry)
-    local tooltipObject = WT.addToolTip()
+    local tooltipObject = ISWorldObjectContextMenu.addToolTip()
     local valid = false
 
     if instanceof(entry,"InventoryItem") then
@@ -203,7 +194,12 @@ WT.getToolTip = function(entry)
         valid = true
         tooltipObject.fluid = entry
 
-        local s = "<BR><BR><CENTRE>" .. entry:getDisplayName()
+        -- fluid color tooltip
+        local color = entry:getColor()
+        local r,g,b = color:getRedFloat(), color:getGreenFloat(), color:getBlueFloat()
+        local w,h = 50,50
+
+        local s = "<FLUIDBOXCENTRE:"..w..","..h..","..r..","..g..","..b..">\n<CENTRE>" .. entry:getDisplayName()
         tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
     end
 
