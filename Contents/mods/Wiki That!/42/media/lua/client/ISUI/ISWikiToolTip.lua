@@ -94,24 +94,24 @@ function ISWikiToolTip:reset()
 
     self.fluid = nil
 
-	-- override previously set border and background colors
-	self.borderColor = copyTbl(WT.backgroundColor_highlight)
-	self.backgroundColor = copyTbl(WT.backgroundColor_darkest)
+	-- -- override previously set border and background colors
+	-- self.borderColor = copyTbl(WT.backgroundColor_highlight)
+	-- self.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 
-	self.descriptionPanel.borderColor = copyTbl(WT.backgroundColor_highlight)
-	self.descriptionPanel.backgroundColor = copyTbl(WT.backgroundColor_darkest)
+	-- self.descriptionPanel.borderColor = copyTbl(WT.backgroundColor_highlight)
+	-- self.descriptionPanel.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 end
 
 ISWikiToolTip.originalNew = ISWikiToolTip.new
 function ISWikiToolTip:new()
     local o = ISWikiToolTip.originalNew(self)
 
-	-- set colors
-	o.borderColor = copyTbl(WT.backgroundColor_highlight)
-	o.backgroundColor = copyTbl(WT.backgroundColor_darkest)
+	-- -- set colors
+	-- o.borderColor = copyTbl(WT.backgroundColor_highlight)
+	-- o.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 
-	o.descriptionPanel.borderColor = copyTbl(WT.backgroundColor_highlight)
-	o.descriptionPanel.backgroundColor = copyTbl(WT.backgroundColor_darkest)
+	-- o.descriptionPanel.borderColor = copyTbl(WT.backgroundColor_highlight)
+	-- o.descriptionPanel.backgroundColor = copyTbl(WT.backgroundColor_darkest)
 
     return o
 end

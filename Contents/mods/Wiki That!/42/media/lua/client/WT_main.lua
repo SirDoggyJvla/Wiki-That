@@ -210,25 +210,6 @@ WT.getToolTip = function(entry)
     return valid and tooltipObject or nil
 end
 
--- hook to render
-WT.originalRender = ISContextMenu.render
-
----Adjust the context menu option border and background color
----@param self table
-WT.renderOptionHook = function(self)
-    WT.originalRender(self)
-
-    local i, option = WT.getOptionIndexFromName(self, getText("IGUI_WikiThat"))
-    if option then
-        local y = WT.getStartY(self)
-        y = y + self.itemHgt*(i-1)
-
-        self:drawRect(0, y, self.width, self.itemHgt, 0.1, 1, 0.6, 0)
-        self:drawRectBorder(0, y, self.width, self.itemHgt, 0.2, 1, 0, 0)
-    end
-end
-ISContextMenu.render = WT.renderOptionHook -- replace original with our hook
-
 ---Finds the start y coordinates used to render the context menu options borders and backgrounds
 ---@param context ISContextMenu
 ---@return integer
