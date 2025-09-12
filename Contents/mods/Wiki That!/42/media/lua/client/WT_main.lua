@@ -115,7 +115,7 @@ WT.populateDictionary = function(context, uniqueEntries)
             option.notAvailable = true
         end
 
-        local tooltipObject = WT.getToolTip(entry)
+        local tooltipObject = WT.getToolTip(entry, fullType)
         if tooltipObject then
             if not pageName then
                 tooltipObject.description = getText("IGUI_WikiThat_NoPage")
@@ -160,12 +160,13 @@ WT.createOptionEntry = function(context, fullType, entry)
     local pageName = WT.fetchPageName(fullType, entry)
 
     local displayName = entry:getDisplayName()
-    local tooltip = WT.getToolTip(entry)
+    local tooltip = WT.getToolTip(entry, fullType)
 
     local icon = nil
     if instanceof(entry,"InventoryItem") then
         icon = entry:getTexture()
-    -- elseif instanceof(entry,"Fluid") then
+    elseif instanceof(entry,"BaseVehicle") then
+        icon = WT.tryGetVehicleIcon(fullType)
     end
 
     -- create option
@@ -183,7 +184,7 @@ end
 ---comment
 ---@param entry InventoryItem|Fluid|BaseVehicle
 ---@return ISToolTip|nil
-WT.getToolTip = function(entry)
+WT.getToolTip = function(entry, fullType)
     local tooltipObject = ISWorldObjectContextMenu.addToolTip()
     local valid = false
 
@@ -222,12 +223,35 @@ WT.getToolTip = function(entry)
     -- vehicle
     elseif instanceof(entry,"BaseVehicle") then
         ---@cast entry BaseVehicle
+        WT.tryGetVehicleIcon(fullType)
+
+        -- get item texture
+        local texture = WT.tryGetVehicleIcon(fullType)
+        print(texture)
+        local imgString
+        if texture then
+            local width = texture:getWidth()
+            local height = texture:getHeight()
+            local texturePath = string.gsub(texture:getName(), "^.*media", "media")
+
+            -- find proper texture size for the tooltip
+            local ratio = width/height
+            height = 40 -- fixed height
+            width = height*ratio -- adjust width
+
+            imgString = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n"
+        end
+        print(imgString)
+
         valid = true
         local script = entry:getScript()
         local carName = script:getCarModelName() or script:getName()
         local name = getText("IGUI_VehicleName" .. carName)
         -- draw tooltip
         local s = "<CENTRE>" .. name
+        if imgString then
+            s = imgString .. s
+        end
         tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
     end
 
@@ -245,6 +269,30 @@ WT.getStartY = function(context)
 		y = y + dy
 	end
     return y
+end
+
+---Helper split function from from https://stackoverflow.com/a/7615129
+---@param inputstr string
+---@param sep string|nil
+---@return table
+local function split(inputstr, sep)
+  if sep == nil then
+    sep = "%s"
+  end
+  local t = {}
+  for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+    table.insert(t, str)
+  end
+  return t
+end
+
+---comment
+---@param fullType string
+---@return Texture|nil
+WT.tryGetVehicleIcon = function(fullType)
+    local type = split(fullType, ".")[2] or nil
+    local icon = type and getTexture("media/ui/vehicle_icons/" .. type .. "_Model.png")
+    return icon
 end
 
 ---Find the context menu option with specified `name` and return its index position and the option table
@@ -272,7 +320,7 @@ end
 
 --- Opens the wiki page for a given page name. Checks if the Steam overlay is
 --- activated and used that or use the default browser.
----@param pageName PageName
+---@param pageName PageName|nil
 WT.openWikiPage = function(pageName)
     if not pageName then return end
     local url = WT.pageNameToUrl(pageName)

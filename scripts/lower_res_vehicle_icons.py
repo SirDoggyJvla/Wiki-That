@@ -1,22 +1,41 @@
 import os
 from PIL import Image
+from tqdm import tqdm
 
-image_folder = "../image/vehicle_renders"
-output_folder = "../image/vehicle_renders_lower_res"
+def lower_res_image(image, new_height=128):
+    width, height = image.size
+    aspect_ratio = width / height
+    new_width = int(aspect_ratio * new_height)
+    image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    return image
 
-os.makedirs(output_folder, exists_ok=True)
-
-def lower_res_image(image_path, output_path):
+def load_image(image_path):
     with Image.open(image_path) as img:
-        img = img.resize((img.width // 2, img.height // 2), Image.ANTIALIAS)
-        img.save(output_path)
+        return img.copy()
+    
+def reframe_transparent_borders(image):
+    # remove borders around the object that are fully transparent
+    bbox = image.getbbox()
+    if bbox:
+        return image.crop(bbox)
+    return image  # if the image is fully transparent, return as is
 
-for filename in os.listdir(image_folder):
-    if filename.endswith(".png"):
+if __name__ == "__main__":
+    image_folder = "./image/vehicle_renders"
+    image_folder = os.path.abspath(image_folder)
+    output_folder = "./Contents/mods/Wiki That!/common/media/ui/vehicle_icons"
+    output_folder = os.path.abspath(output_folder)
+
+    os.makedirs(output_folder, exist_ok=True)
+
+    for filename in tqdm(os.listdir(image_folder), desc="Processing images", unit="file"):
+        if not filename.endswith(".png"):
+            continue
+        
         input_path = os.path.join(image_folder, filename)
         output_path = os.path.join(output_folder, filename)
-        lower_res_image(input_path, output_path)
-        print(f"Processed {filename} to lower resolution.")
-    else:
-        print(f"Skipped {filename}, not a PNG file.")
-        continue
+        
+        img = load_image(input_path)
+        img = reframe_transparent_borders(img)
+        img = lower_res_image(img, new_height=64)
+        img.save(output_path)
