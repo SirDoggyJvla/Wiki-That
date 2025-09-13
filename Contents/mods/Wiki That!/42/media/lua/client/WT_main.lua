@@ -363,6 +363,11 @@ end
 ---@param pageName PageName|nil
 WT.openWikiPage = function(pageName)
     if not pageName then return end
+    -- pause the game
+    local SC = UIManager.getSpeedControls()
+    if SC and not SC:isPaused() then
+        SC:Pause()
+    end
     local url = WT.pageNameToUrl(pageName)
     if isSteamOverlayEnabled() then
         activateSteamOverlayToWebPage(url)

@@ -1,0 +1,13 @@
+[ ALERT_CONFIG ]
+link1 = Sir Doggy Jvla's Kofi = https://steamcommunity.com/linkfilter/?u=https://ko-fi.com/sirdoggyjvla,
+link2 = Workshop = https://steamcommunity.com/id/jvladeya/myworkshopfiles/?appid=108600,
+link3 = Github = https://steamcommunity.com/linkfilter/?u=https://github.com/SirDoggyJvla,
+[ ------ ]
+
+[ 09/13/25 ]
+1.0.0
+- Release
+
+1.1.0
+- Game now pauses when opening a wiki page
+[ ------ ]
