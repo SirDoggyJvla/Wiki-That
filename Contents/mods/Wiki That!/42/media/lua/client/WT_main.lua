@@ -1,5 +1,6 @@
 ---@alias URL string
 ---@alias PageName string
+---@alias Wikable InventoryItem|Fluid|BaseVehicle|Moveable
 
 ---CACHE
 local WT = require "WT_module"
@@ -76,12 +77,15 @@ WT.getFluidsInFluidContainer = function(fluidContainer)
     return fluidLog
 end
 
----comment
----@param uniqueEntries table
+---Fetch fluid entries from the given dictionary of unique entries and add them to the same dictionary.
+---@param uniqueEntries table<string, Wikable>
 ---@return table
 WT.fetchFluidEntries = function(uniqueEntries)
-    for _, item in pairs(uniqueEntries) do repeat
-        local fluidContainer = item:getFluidContainerFromSelfOrWorldItem()
+    for _, entry in pairs(uniqueEntries) do repeat
+        if not instanceof(entry,"InventoryItem") then break end
+        ---@cast entry InventoryItem
+
+        local fluidContainer = entry:getFluidContainerFromSelfOrWorldItem()
         if not fluidContainer then break end
 
         local fluidLog = WT.getFluidsInFluidContainer(fluidContainer)
@@ -95,7 +99,7 @@ end
 
 ---Populate the context menu with Wiki That for entries from the dictionaries.
 ---@param context ISContextMenu
----@param uniqueEntries table
+---@param uniqueEntries table<string, Wikable>
 WT.populateDictionary = function(context, uniqueEntries)
     local entryCount = lenDict(uniqueEntries)
     if entryCount <= 0 then return end -- skip since nothing to add
@@ -107,27 +111,7 @@ WT.populateDictionary = function(context, uniqueEntries)
         for k,v in pairs(uniqueEntries) do
             fullType, entry = k,v
         end
-
-        local pageName = WT.fetchPageName(fullType, entry)
-        local option = context:addOption(getText("IGUI_WikiThat"), pageName, WT.openWikiPage)
-        option.iconTexture = getTexture("favicon-128.png")
-        if not pageName then
-            option.notAvailable = true
-        end
-
-        local tooltipObject = WT.getToolTip(entry, fullType)
-        if tooltipObject then
-            if not pageName then
-                local text
-                if entry:getName() then
-                    text = string.format(getText("IGUI_WikiThat_NoPage"), entry:getDisplayName())
-                else
-                    text = getText("IGUI_WikiThat_NoPage_noName")
-                end
-                tooltipObject.description = text
-            end
-            option.toolTip = tooltipObject
-        end
+        WT.createOptionEntry(context, fullType, entry, true)
 
         return
     end
@@ -143,7 +127,10 @@ WT.populateDictionary = function(context, uniqueEntries)
     end
 end
 
-
+---Retrieve the wiki page name for a given entry type and full type.
+---@param fullType string
+---@param entry Wikable
+---@return string|nil
 WT.fetchPageName = function(fullType, entry)
     -- data
     if instanceof(entry,"Moveable") then
@@ -162,39 +149,74 @@ WT.fetchPageName = function(fullType, entry)
     return nil
 end
 
-WT.createOptionEntry = function(context, fullType, entry)
+---Create a context menu option entry
+---@param context ISContextMenu
+---@param fullType string
+---@param entry Wikable
+---@param _isMain boolean|nil -- if true, this is the parent option "Wiki That!"
+---@return table
+WT.createOptionEntry = function(context, fullType, entry, _isMain)
     local pageName = WT.fetchPageName(fullType, entry)
 
-    local displayName = entry:getDisplayName()
-    local tooltip = WT.getToolTip(entry, fullType)
+    local displayName = WT.tryGetName(entry)
+    local tooltipObject = WT.getToolTip(entry, fullType)
 
+    -- retrieve icon based on conditions
     local icon = nil
-    if instanceof(entry,"InventoryItem") then
+    if _isMain then
+        icon = getTexture("favicon-128.png")
+    elseif instanceof(entry,"InventoryItem") then
+        ---@cast entry InventoryItem
         icon = entry:getTexture()
     elseif instanceof(entry,"BaseVehicle") then
+        ---@cast entry BaseVehicle
         icon = WT.tryGetVehicleIcon(fullType)
     end
 
     -- create option
-    local option = context:addOption(displayName, pageName, WT.openWikiPage)
-    if not pageName then
-        tooltip.description = string.format(getText("IGUI_WikiThat_NoPage"), displayName)
-        option.notAvailable = true
+    local optionName = _isMain and getText("IGUI_WikiThat") or displayName or fullType
+    local option = context:addOption(optionName, pageName, WT.openWikiPage) --[[@as table]]
+
+    -- special case for fluids to show a fluid icon with the fluid color
+    if instanceof(entry,"Fluid") or not _isMain then
+        ---@cast entry Fluid
+
+        -- set texture and option color field for the icon color
+        option.iconTexture = getTexture("Item_Waterdrop_Grey.png")
+        local c = entry:getColor()
+        option.color = {
+            r = c:getRedFloat(),
+            g = c:getGreenFloat(),
+            b = c:getBlueFloat(),
+        }
     end
 
+    -- handle no wiki page case
+    if not pageName then
+        local text
+        if displayName then
+            text = string.format(getText("IGUI_WikiThat_NoPage"), displayName)
+        else -- case where entry can't have a name (burnt vehicles without names for example)
+            text = getText("IGUI_WikiThat_NoPage_noName")
+        end
+        tooltipObject.description = text
+        option.notAvailable = true -- can't click it
+    end
+
+    -- assign icon and tooltip
     if icon then option.iconTexture = icon end
-    if tooltip then option.toolTip = tooltip end
+    if tooltipObject then option.toolTip = tooltipObject end
     return option
 end
 
----comment
----@param entry InventoryItem|Fluid|BaseVehicle
+---Retrieve the tooltip for this type of entry
+---@param entry Wikable
 ---@return ISToolTip|nil
 WT.getToolTip = function(entry, fullType)
     local tooltipObject = ISWorldObjectContextMenu.addToolTip()
     local valid = false
 
-    -- inventory item
+    -- inventory item / moveable
     if instanceof(entry,"InventoryItem") then
         ---@cast entry InventoryItem
         valid = true
@@ -253,9 +275,8 @@ WT.getToolTip = function(entry, fullType)
         local name = getText("IGUI_VehicleName" .. carName)
         -- draw tooltip
         local s = "<CENTRE>" .. name
-        if imgString then
-            s = imgString .. s
-        end
+        s = imgString and imgString .. s or s
+
         tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
     end
 
@@ -280,14 +301,14 @@ end
 ---@param sep string|nil
 ---@return table
 local function split(inputstr, sep)
-  if sep == nil then
-    sep = "%s"
-  end
-  local t = {}
-  for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-    table.insert(t, str)
-  end
-  return t
+    if sep == nil then
+        sep = "%s"
+    end
+    local t = {}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+    return t
 end
 
 ---Try to retrieve a vehicle icon texture based on the vehicle full type.
@@ -297,6 +318,21 @@ WT.tryGetVehicleIcon = function(fullType)
     local type = split(fullType, ".")[2] or nil
     local icon = type and getTexture("media/ui/vehicle_icons/" .. type .. "_Model.png")
     return icon
+end
+
+---Try to retrieve the display name of an entry.
+---@param entry Wikable
+---@return string|nil
+WT.tryGetName = function(entry)
+    if instanceof(entry,"Fluid") then
+        ---@cast entry Fluid
+        return entry:getDisplayName()
+    end
+    ---@cast entry -Fluid
+    if entry:getName() then
+        return entry:getDisplayName()
+    end
+    return nil
 end
 
 ---Find the context menu option with specified `name` and return its index position and the option table
