@@ -1,5 +1,6 @@
 IGUI_EN = {
     IGUI_WikiThat = "Wiki That!",
     IGUI_WikiThat_Tooltip = "Open the wiki page of:<BR><BR>%s",
-    IGUI_WikiThat_NoPage = "No wiki page found.",
+    IGUI_WikiThat_NoPage = "No wiki page found for %s.",
+    IGUI_WikiThat_NoPage_noName = "No wiki page found.",
 }

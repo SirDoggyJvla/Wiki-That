@@ -28,7 +28,6 @@ function ISRichTextPanel:processCommand(command, x, y, lineImageHeight, lineHeig
         --     g = tonumber(string.trim(vs[5]))
         --     b = tonumber(string.trim(vs[6]))
         -- end
-        self.colorbox = self.colorbox or {} -- init
 
         if(x + w >= self.width - (self.marginLeft + self.marginRight)) then
             x = 0
@@ -45,7 +44,9 @@ function ISRichTextPanel:processCommand(command, x, y, lineImageHeight, lineHeig
             w=w, h=h,
             r=r, g=g, b=b,
         }
-        table.insert(self.colorbox, entry)
+
+        self.fluidbox = self.fluidbox or {} -- init
+        table.insert(self.fluidbox, entry)
 
         -- new position values
         x = x + w + 7
@@ -55,15 +56,21 @@ function ISRichTextPanel:processCommand(command, x, y, lineImageHeight, lineHeig
     return originalProcessCommand(self, command, x, y, lineImageHeight, lineHeight)
 end
 
+local originalPaginate = ISRichTextPanel.paginate
+function ISRichTextPanel:paginate()
+    self.fluidbox = nil -- reset
+    return originalPaginate(self)
+end
+
 local originalRender = ISRichTextPanel.render
 function ISRichTextPanel:render()
     originalRender(self)
 
-    local colorbox = self.colorbox
-    if not colorbox then return end
+    local fluidbox = self.fluidbox
+    if not fluidbox then return end
 
-    for i=1,#colorbox do
-        local entry = colorbox[i]
+    for i=1,#fluidbox do
+        local entry = fluidbox[i]
         if entry.drawn then break end -- only draw one per render call
 
         local x,y = entry.x, entry.y

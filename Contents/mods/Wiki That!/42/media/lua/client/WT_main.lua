@@ -118,7 +118,13 @@ WT.populateDictionary = function(context, uniqueEntries)
         local tooltipObject = WT.getToolTip(entry, fullType)
         if tooltipObject then
             if not pageName then
-                tooltipObject.description = getText("IGUI_WikiThat_NoPage")
+                local text
+                if entry:getName() then
+                    text = string.format(getText("IGUI_WikiThat_NoPage"), entry:getDisplayName())
+                else
+                    text = getText("IGUI_WikiThat_NoPage_noName")
+                end
+                tooltipObject.description = text
             end
             option.toolTip = tooltipObject
         end
@@ -172,7 +178,7 @@ WT.createOptionEntry = function(context, fullType, entry)
     -- create option
     local option = context:addOption(displayName, pageName, WT.openWikiPage)
     if not pageName then
-        tooltip.description = getText("IGUI_WikiThat_NoPage")
+        tooltip.description = string.format(getText("IGUI_WikiThat_NoPage"), displayName)
         option.notAvailable = true
     end
 
@@ -227,7 +233,6 @@ WT.getToolTip = function(entry, fullType)
 
         -- get item texture
         local texture = WT.tryGetVehicleIcon(fullType)
-        print(texture)
         local imgString
         if texture then
             local width = texture:getWidth()
@@ -241,7 +246,6 @@ WT.getToolTip = function(entry, fullType)
 
             imgString = "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n"
         end
-        print(imgString)
 
         valid = true
         local script = entry:getScript()
@@ -271,7 +275,7 @@ WT.getStartY = function(context)
     return y
 end
 
----Helper split function from from https://stackoverflow.com/a/7615129
+---Helper split function from https://stackoverflow.com/a/7615129
 ---@param inputstr string
 ---@param sep string|nil
 ---@return table
@@ -286,7 +290,7 @@ local function split(inputstr, sep)
   return t
 end
 
----comment
+---Try to retrieve a vehicle icon texture based on the vehicle full type.
 ---@param fullType string
 ---@return Texture|nil
 WT.tryGetVehicleIcon = function(fullType)
