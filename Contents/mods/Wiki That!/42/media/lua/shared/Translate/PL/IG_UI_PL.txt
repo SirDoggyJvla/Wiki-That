@@ -1,6 +1,6 @@
 IGUI_PL = {
     IGUI_WikiThat = "Wiki That!",
-    IGUI_WikiThat_Tooltip = "Otwórz stronę wiki dla:<BR><BR>%ss",
+    IGUI_WikiThat_Tooltip = "Otwórz stronę wiki dla:<BR><BR>%s",
     IGUI_WikiThat_NoPage = "Nie znaleziono strony wiki dla %s.",
     IGUI_WikiThat_NoPage_noName = "Nie znaleziono strony wiki.",
 }
