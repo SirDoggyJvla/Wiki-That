@@ -1,0 +1,33 @@
+[
+    {
+        "category": "item",
+        "id": "item_id",
+        "file": "WT_items.lua",
+        "descriptor": "Item dictionary"
+    },
+    {
+        "category": "fluid",
+        "id": "fluid_id",
+        "file": "WT_fluids.lua",
+        "descriptor": "Fluid dictionary"
+    },
+    {
+        "category": "vehicle",
+        "id": "vehicle_id",
+        "file": "WT_vehicles.lua",
+        "descriptor": "Vehicle dictionary"
+    },
+    {
+        "category": "tile",
+        "id": "item_id",
+        "second_id": "sprite_id",
+        "file": "WT_moveables.lua",
+        "descriptor": "Moveable dictionary"
+    },
+    {
+        "category": "item",
+        "id": "rm_guid",
+        "file": "WT_media.lua",
+        "descriptor": "Media dictionary"
+    }
+]

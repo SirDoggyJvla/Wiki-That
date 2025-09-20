@@ -1,6 +1,7 @@
 -- THIS FILE IS AUTO-GENERATED. DO NOT EDIT MANUALLY.
 -- Moveable dictionary
 return {
+    ["Moveables.location_shop_greenes_01_45"] = "49 / 99 Cent Sign",
     ["Moveables.location_restaurant_diner_01_42"] = "50s Bar Stool",
     ["Moveables.location_restaurant_diner_01_6+7"] = "50s Diner Table",
     ["Moveables.location_restaurant_diner_01_15+14"] = "50s Diner Table",

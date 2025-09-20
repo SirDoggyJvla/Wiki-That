@@ -4,11 +4,14 @@
 
 ---CACHE
 local WT = require "WT_module"
+local WT_utility = require "WT_utility"
+local WT_pages = require "WT_pages"
 -- data
 WT.itemDictionary = require "data/WT_items"
 WT.fluidDictionary = require "data/WT_fluids"
 WT.vehicleDictionary = require "data/WT_vehicles"
 WT.moveableDictionary = require "data/WT_moveables"
+WT.mediaDictionary = require "data/WT_media"
 -- reset pool
 WT.tooltipPool = {}
 WT.tooltipsUsed = {}
@@ -25,6 +28,12 @@ local function printTable(tbl, maxLvl, _lvl)
             printTable(v, maxLvl, _lvl + 1)
         end
     end
+end
+
+WT.OnInitGlobalModData = function(newGame)
+    -- init cache
+    WT.cachePageFetch = {}
+    WT.cacheNameFetch = {}
 end
 
 ---Add a single context menu option "Wiki That!" to the inventory context menu.
@@ -49,33 +58,18 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 
         local fullType = item:getFullType()
         uniqueItems[fullType] = item
+
+        -- DebugLog.log(fullType .. "   " .. tostring(item))
+        -- local media = item:getMediaData()
+        -- print(media)
     end
 
     local uniqueEntries = WT.fetchFluidEntries(uniqueItems)
     WT.populateDictionary(context, uniqueEntries)
 end
 
----Utility to count entries in a dictionary (key-table).
-local lenDict = function(dict)
-    local i = 0
-    for _,_ in pairs(dict) do
-        i = i + 1
-    end
-    return i
-end
 
-WT.getFluidsInFluidContainer = function(fluidContainer)
-    local fluidLog = {}
-    local fluids = Fluid.getAllFluids();
-    for i=0,fluids:size()-1 do
-        local fluid = fluids:get(i);
-        local amount = fluidContainer:getSpecificFluidAmount(fluid)
-        if amount > 0 then
-            fluidLog[fluid:getFluidTypeString()] = fluid
-        end
-    end
-    return fluidLog
-end
+
 
 ---Fetch fluid entries from the given dictionary of unique entries and add them to the same dictionary.
 ---@param uniqueEntries table<string, Wikable>
@@ -88,7 +82,7 @@ WT.fetchFluidEntries = function(uniqueEntries)
         local fluidContainer = entry:getFluidContainerFromSelfOrWorldItem()
         if not fluidContainer then break end
 
-        local fluidLog = WT.getFluidsInFluidContainer(fluidContainer)
+        local fluidLog = WT_utility.getFluidsInFluidContainer(fluidContainer)
         for fluidType, fluid in pairs(fluidLog) do
             fluidType = "Base." .. fluidType
             uniqueEntries[fluidType] = fluid
@@ -101,7 +95,7 @@ end
 ---@param context ISContextMenu
 ---@param uniqueEntries table<string, Wikable>
 WT.populateDictionary = function(context, uniqueEntries)
-    local entryCount = lenDict(uniqueEntries)
+    local entryCount = WT_utility.lenDict(uniqueEntries)
     if entryCount <= 0 then return end -- skip since nothing to add
 
     -- handle single entry case
@@ -127,26 +121,58 @@ WT.populateDictionary = function(context, uniqueEntries)
     end
 end
 
+WT.fetchPageName = function(fullType, entry)
+    -- check cache first
+    local cache = WT.cachePageFetch[entry]
+    if cache then return cache end
+
+    local pageName = WT.tryFetchPageName(fullType, entry)
+
+    -- store in cache
+    WT.cachePageFetch[entry] = pageName
+    return pageName
+end
+
 ---Retrieve the wiki page name for a given entry type and full type.
 ---@param fullType string
 ---@param entry Wikable
 ---@return string|nil
-WT.fetchPageName = function(fullType, entry)
+WT.tryFetchPageName = function(fullType, entry)
+    local cache = WT.tryFetchFromCache(entry)
+    if cache then return cache end
+
     -- data
     if instanceof(entry,"Moveable") then
+        ---@cast entry Moveable
         local moveableDictionary = WT.moveableDictionary
         return moveableDictionary[fullType]
     elseif instanceof(entry,"InventoryItem") then
+        ---@cast entry InventoryItem
+        -- handle media unique pages
+        local media = entry:getMediaData()
+        if media then
+            local rm_guid = media:getId()
+            local mediaDictionary = WT.mediaDictionary
+            local page = mediaDictionary[rm_guid]
+            if page then return page end
+        end
+
         local itemDictionary = WT.itemDictionary
         return itemDictionary[fullType]
     elseif instanceof(entry,"Fluid") then
+        ---@cast entry Fluid
         local fluidDictionary = WT.fluidDictionary
         return fluidDictionary[fullType]
     elseif instanceof(entry,"BaseVehicle") then
+        ---@cast entry BaseVehicle
         local vehicleDictionary = WT.vehicleDictionary
         return vehicleDictionary[fullType]
     end
     return nil
+end
+
+WT.tryFetchFromCache = function(entry)
+    return WT.cachePageFetch[entry]
 end
 
 ---Create a context menu option entry
@@ -158,7 +184,7 @@ end
 WT.createOptionEntry = function(context, fullType, entry, _isMain)
     local pageName = WT.fetchPageName(fullType, entry)
 
-    local displayName = WT.tryGetName(entry)
+    local displayName = WT_utility.getName(entry)
     local tooltipObject = WT.getToolTip(entry, fullType)
 
     -- retrieve icon based on conditions
@@ -175,7 +201,7 @@ WT.createOptionEntry = function(context, fullType, entry, _isMain)
 
     -- create option
     local optionName = _isMain and getText("IGUI_WikiThat") or displayName or fullType
-    local option = context:addOption(optionName, pageName, WT.openWikiPage) --[[@as table]]
+    local option = context:addOption(optionName, pageName, WT_utility.openWikiPage) --[[@as table]]
 
     -- special case for fluids to show a fluid icon with the fluid color
     if instanceof(entry,"Fluid") or not _isMain then
@@ -283,95 +309,4 @@ WT.getToolTip = function(entry, fullType)
     return valid and tooltipObject or nil
 end
 
----Finds the start y coordinates used to render the context menu options borders and backgrounds
----@param context ISContextMenu
----@return integer
-WT.getStartY = function(context)
-    local y = context.padTopBottom
-	local dy = 0
-	if context:getScrollHeight() > context:getScrollAreaHeight() then
-		dy = context.scrollIndicatorHgt
-		y = y + dy
-	end
-    return y
-end
 
----Helper split function from https://stackoverflow.com/a/7615129
----@param inputstr string
----@param sep string|nil
----@return table
-local function split(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
-    local t = {}
-    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-        table.insert(t, str)
-    end
-    return t
-end
-
----Try to retrieve a vehicle icon texture based on the vehicle full type.
----@param fullType string
----@return Texture|nil
-WT.tryGetVehicleIcon = function(fullType)
-    local type = split(fullType, ".")[2] or nil
-    local icon = type and getTexture("media/ui/vehicle_icons/" .. type .. "_Model.png")
-    return icon
-end
-
----Try to retrieve the display name of an entry.
----@param entry Wikable
----@return string|nil
-WT.tryGetName = function(entry)
-    if instanceof(entry,"Fluid") then
-        ---@cast entry Fluid
-        return entry:getDisplayName()
-    end
-    ---@cast entry -Fluid
-    if entry:getName() then
-        return entry:getDisplayName()
-    end
-    return nil
-end
-
----Find the context menu option with specified `name` and return its index position and the option table
----@param context ISContextMenu
----@param name string
----@return integer|nil
----@return table|nil
-WT.getOptionIndexFromName = function(context, name)
-    local options = context.options -- context menu options
-    for i=1,#options do
-        local option = options[i]
-        if option.name == name then
-            return i,option
-        end
-    end
-    return nil, nil
-end
-
---- Converts a page name to its URL
----@param pageName PageName
----@return URL
-WT.pageNameToUrl = function(pageName)
-    return "https://steamcommunity.com/linkfilter/?u=https://pzwiki.net/wiki/" .. pageName
-end
-
---- Opens the wiki page for a given page name. Checks if the Steam overlay is
---- activated and used that or use the default browser.
----@param pageName PageName|nil
-WT.openWikiPage = function(pageName)
-    if not pageName then return end
-    -- pause the game
-    local SC = UIManager.getSpeedControls()
-    if SC and not SC:isPaused() then
-        SC:Pause()
-    end
-    local url = WT.pageNameToUrl(pageName)
-    if isSteamOverlayEnabled() then
-        activateSteamOverlayToWebPage(url)
-    else
-        openUrl(url)
-    end
-end

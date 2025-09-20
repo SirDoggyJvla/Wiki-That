@@ -72,12 +72,16 @@ def _dict_to_lua_table(d, file_path, descriptor=None):
 
 if __name__ == "__main__":
     path_to_lua = "Contents/mods/Wiki That!/common/media/lua/shared/data"
-    read_to_write = [
-        {"category": "item", "id": "item_id", "file": "WT_items.lua", "descriptor": "Item dictionary"},
-        {"category": "fluid", "id": "fluid_id", "file": "WT_fluids.lua", "descriptor": "Fluid dictionary"},
-        {"category": "vehicle", "id": "vehicle_id", "file": "WT_vehicles.lua", "descriptor": "Vehicle dictionary"},
-        {"category": "tile", "id": "item_id", "second_id": "sprite_id", "file": "WT_moveables.lua", "descriptor": "Moveable dictionary"},
-    ]
+
+    """
+        category: the top-level key in the JSON (e.g., "item", "vehicle", etc.)
+        id: the key within each entry to use as the dictionary key (e.g., "rm_guid", "type", etc.)
+        second_id: (optional) a secondary key to format the id (e.g., "sprite_id")
+        file: the output Lua file name
+        descriptor: (optional) a comment to describe the dictionary's purpose inside the Lua file
+    """
+    with open('./scripts/read_to_write.json', 'r', encoding='utf-8') as f:
+        read_to_write = json.load(f)
 
     # https://github.com/Vaileasys/pz-wiki_parser/blob/main/resources/page_dictionary.json
     _download_dictionary()
