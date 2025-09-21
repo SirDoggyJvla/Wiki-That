@@ -29,5 +29,29 @@
         "id": "rm_guid",
         "file": "WT_media.lua",
         "descriptor": "Media dictionary"
+    },
+    {
+        "category": "trait",
+        "id": "trait_id",
+        "file": "WT_traits.lua",
+        "descriptor": "Trait dictionary"
+    },
+    {
+        "category": "occupation",
+        "id": "occupation_id",
+        "file": "WT_professions.lua",
+        "descriptor": "Profession/Occupation dictionary"
+    },
+    {
+        "category": "animal",
+        "id": "animal_id",
+        "file": "WT_animals.lua",
+        "descriptor": "Animal dictionary"
+    },
+    {
+        "category": "foraging_category",
+        "id": "category_id",
+        "file": "WT_forage.lua",
+        "descriptor": "Foraging category dictionary"
     }
 ]

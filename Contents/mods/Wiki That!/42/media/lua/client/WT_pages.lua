@@ -7,12 +7,15 @@ local WT_pages = {}
 
 ---CACHE
 local WT = require "WT_module"
+local WT_utility = require "WT_utility"
 -- data
 local itemDictionary = require "data/WT_items"
 local fluidDictionary = require "data/WT_fluids"
 local vehicleDictionary = require "data/WT_vehicles"
 local moveableDictionary = require "data/WT_moveables"
 local mediaDictionary = require "data/WT_media"
+local traitDictionary = require "data/WT_traits"
+local professionDictionary = require "data/WT_professions"
 
 ---Retrieve the wiki page name for a given entry type and full type.
 ---@param fullType string
@@ -51,12 +54,21 @@ WT_pages.tryGetPageName = function(fullType, entry)
         end
 
         return itemDictionary[fullType]
+    elseif instanceof(entry,"Item") then
+        ---@cast entry Item
+        return itemDictionary[fullType]
     elseif instanceof(entry,"Fluid") then
         ---@cast entry Fluid
         return fluidDictionary[fullType]
     elseif instanceof(entry,"BaseVehicle") then
         ---@cast entry BaseVehicle
         return vehicleDictionary[fullType]
+    elseif WT_utility.instanceof(entry,"TraitFactory.Trait") then
+        ---@cast entry Trait
+        return traitDictionary[fullType]
+    elseif WT_utility.instanceof(entry,"ProfessionFactory.Profession") then
+        ---@cast entry Profession
+        return professionDictionary[fullType]
     end
     return nil
 end

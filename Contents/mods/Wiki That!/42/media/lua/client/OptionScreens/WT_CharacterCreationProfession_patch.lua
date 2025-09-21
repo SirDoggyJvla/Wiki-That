@@ -13,6 +13,7 @@ function CharacterCreationProfession:create()
     self.listboxTraitSelected.onRightMouseDown = patch.onRightClickTrait
     self.listboxTrait.onRightMouseDown = patch.onRightClickTrait
     self.listboxBadTrait.onRightMouseDown = patch.onRightClickTrait
+    self.listboxProf.onRightMouseDown = patch.onRightClickTrait
 end
 
 ---Initialize the context menu for right clicking traits
@@ -21,56 +22,22 @@ patch.traitContextMenu:initialise()
 patch.traitContextMenu:addToUIManager()
 patch.traitContextMenu:setVisible(false)
 patch.traitContextMenu.onMouseMove = patch.onMouseMove
-
----@DEBUG
-local function printTable(tbl, maxLvl, _lvl)
-    if type(tbl) ~= "table" then print("not a table") return end
-    _lvl = _lvl or 0
-    maxLvl = maxLvl or 2
-    for k, v in pairs(tbl) do
-        DebugLog.log(string.rep(" ", _lvl * 4) .. tostring(k) .. " " .. tostring(v))
-        -- DebugLog.log(tostring(k))
-        if type(v) == "table" and _lvl < maxLvl then
-            printTable(v, maxLvl, _lvl + 1)
-        end
-    end
-end
+patch.traitContextMenu.keepOnScreen = false
 
 patch.onRightClickTrait = function(self, x, y)
-    self:onMouseDown(x, y)
+    self:onMouseDown(x, y) -- update selected item
 
-    print(self.Type) -- CharacterCreationProfessionListBox
-    print(self.target and self.target.Type or "no target") -- CharacterCreationProfession
-    print("Right click on trait")
-
+    -- wiki that the selected trait
     if self.selected then
+        -- init context menu
         local context = patch.traitContextMenu
         context = patch.resetContextMenu(context,getMouseX(), getMouseY())
-        -- context:addOption("Test", self.target, patch.wikiTrait, self)
 
+        -- populate context menu for wiki that
         local trait = self.items[self.selected].item
         local uniqueEntries = {[trait:getType()] = trait,}
         WT.populateDictionary(context, uniqueEntries)
-
-        context:addOption("Test", self.target, patch.wikiTrait, self)
     end
-
-    -- context.mouseOver = 1
-end
-
-patch.wikiTrait = function(professionMenu, listBox)
-    print("open wiki for trait")
-    print(listBox.selected)
-    print(listBox.items[listBox.selected].item)
-    print(listBox.items[listBox.selected])
-    printTable(listBox.items[listBox.selected])
-
-    local trait = listBox.items[listBox.selected].item
-
-    local isTraitFactoryTrait = string.find(tostring(trait), "TraitFactory.Trait")
-
-    local uniqueEntries = {[trait:getType()] = trait,}
-    -- WT.populateDictionary(context, uniqueEntries)
 end
 
 ---Commented out the check for top most menu so that the context menu gets updated and is usable.
@@ -127,14 +94,5 @@ patch.resetContextMenu = function(context,x,y)
 	context:setForceCursorVisible(false)
 	return context
 end
-
--- patch.original_instantiate = MainScreen.instantiate
--- function MainScreen:instantiate()
---     patch.original_instantiate(self)
-
---     self.traitContextMenu = patch.traitContextMenu
---     self:addChild(self.traitContextMenu)
---     -- self.traitContextMenu:create()
--- end
 
 return patch

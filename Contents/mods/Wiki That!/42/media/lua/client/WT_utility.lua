@@ -10,6 +10,8 @@ local WT = require "WT_module"
 local WT_options = require "WT_modOptions"
 
 ---Utility to count entries in a dictionary (key-table).
+---@param dict table
+---@return integer
 WT_utility.lenDict = function(dict)
     local i = 0
     for _,_ in pairs(dict) do
@@ -21,11 +23,9 @@ end
 ---Helper split function from https://stackoverflow.com/a/7615129
 ---@param inputstr string
 ---@param sep string|nil
----@return table
-local function split(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
+---@return table<integer, string>
+WT_utility.split = function(inputstr, sep)
+    sep = sep or "%s"
     local t = {}
     for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
         table.insert(t, str)
@@ -35,32 +35,15 @@ end
 
 
 ---Retrieve the option icon for a given entry.
----@param fullType string
----@param entry Wikable
+---@param wikiElement WikiElement|nil
 ---@param _isMain boolean|nil -- if true, this is the parent option "Wiki That!"
 ---@return Texture|nil
-WT_utility.getOptionIcon = function(fullType, entry, _isMain)
+WT_utility.getOptionIcon = function(wikiElement, _isMain)
     if _isMain then
         return getTexture("favicon-128.png")
-    elseif instanceof(entry,"InventoryItem") then
-        ---@cast entry InventoryItem
-        return entry:getTexture()
-    elseif instanceof(entry,"BaseVehicle") then
-        ---@cast entry BaseVehicle
-        return WT.tryGetVehicleIcon(fullType)
-    elseif instanceof(entry,"Fluid") then
-        return getTexture("Item_Waterdrop_Grey.png")
     end
-    return nil
-end
-
----Try to retrieve a vehicle icon texture based on the vehicle full type.
----@param fullType string
----@return Texture|nil
-WT_utility.tryGetVehicleIcon = function(fullType)
-    local type = split(fullType, ".")[2] or nil
-    local icon = type and getTexture("media/ui/vehicle_icons/" .. type .. "_Model.png")
-    return icon
+    ---@cast wikiElement WikiElement
+    return wikiElement:getIcon()
 end
 
 ---Define a tooltip image rich text panel tag for a given texture.
@@ -68,7 +51,7 @@ end
 ---@param texture Texture|nil
 ---@param _setHeight number|nil -- the height of the image (default: 40)
 ---@return string
-WT_utility.getImageTooltip = function(texture, _setHeight)
+WT_utility.getImageCentre = function(texture, _setHeight)
     if not texture then return "" end
     _setHeight = _setHeight or 40
 
@@ -101,8 +84,8 @@ WT_utility.getFluidsInFluidContainer = function(fluidContainer)
 end
 
 
-WT_utility.instanceof = function(obj)
-    
+WT_utility.instanceof = function(obj, className)
+    return string.find(tostring(obj), className) ~= nil
 end
 
 
@@ -129,8 +112,14 @@ WT_utility.tryGetName = function(entry)
     if instanceof(entry,"Fluid") then
         ---@cast entry Fluid
         return entry:getDisplayName()
+    elseif WT_utility.instanceof(entry,"TraitFactory.Trait")
+        or WT_utility.instanceof(entry,"ProfessionFactory.Profession") then
+        ---@cast entry Trait
+        return entry:getLabel()
     end
     ---@cast entry -Fluid
+    ---@cast entry -Trait
+    ---@cast entry -Profession
 
     -- need to check if has name or this can error out in
     -- cases of entries like vehicles that don't have a name
@@ -154,8 +143,10 @@ end
 
 --- Opens the wiki page for a given page name. Checks if the Steam overlay is
 --- activated and used that or use the default browser.
----@param pageName PageName|nil
-WT_utility.openWikiPage = function(pageName)
+---@param context ISContextMenu
+---@param wikiElement WikiElement
+WT_utility.openWikiPage = function(context, wikiElement)
+    local pageName = wikiElement:getWikiPage()
     if not pageName then return end
     -- pause the game
     if WT_options.Pause:getValue() then

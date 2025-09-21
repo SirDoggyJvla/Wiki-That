@@ -1,3 +1,7 @@
+---@alias URL string
+---@alias PageName string
+---@alias Wikable InventoryItem|Item|Fluid|BaseVehicle|Moveable|Trait|Profession
+
 local WT = {
     backgroundColor_highlight = {r=0.48, g=0.07, b=0.09, a=1},
     backgroundColor_normal = {r=0.29, g=0.05, b=0.05, a=1},
