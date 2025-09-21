@@ -11,3 +11,11 @@ link3 = Github = https://steamcommunity.com/linkfilter/?u=https://github.com/Sir
 1.1.0
 - Game now pauses when opening a wiki page
 [ ------ ]
+
+[ 09/20/25 ]
+1.2.0
+- VHS and TV medias support. They now properly link to their unique Wiki pages.
+- Mod options menu with a pause option when opening a wiki page.
+
+- Reorganized code for further expansions.
+[ ------ ]

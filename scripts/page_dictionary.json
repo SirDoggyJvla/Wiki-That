@@ -38798,6 +38798,208 @@
             ]
         }
     },
+    "moodle": {
+        "Angry": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Angry"
+            ]
+        },
+        "Bleeding": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Bleeding"
+            ]
+        },
+        "Bored": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Bored"
+            ]
+        },
+        "Dead": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Dead"
+            ]
+        },
+        "Discomfort": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Discomfort"
+            ]
+        },
+        "Drunk": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Drunk"
+            ]
+        },
+        "Endurance": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Endurance"
+            ]
+        },
+        "Has a cold": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "HasACold"
+            ]
+        },
+        "Heavy load": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "HeavyLoad"
+            ]
+        },
+        "Hungry": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Hungry"
+            ]
+        },
+        "Hyperthermia": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Hyperthermia"
+            ]
+        },
+        "Hypothermia": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Hypothermia"
+            ]
+        },
+        "Injured": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Injured"
+            ]
+        },
+        "Noxious smell": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "NoxiousSmell"
+            ]
+        },
+        "Pain": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Pain"
+            ]
+        },
+        "Panic": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Panic"
+            ]
+        },
+        "Restricted movement": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "CantSprint"
+            ]
+        },
+        "Sick": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Sick"
+            ]
+        },
+        "Stressed": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Stress"
+            ]
+        },
+        "Thirsty": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Thirst"
+            ]
+        },
+        "Tired": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Tired"
+            ]
+        },
+        "Unhappy": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Unhappy"
+            ]
+        },
+        "Wet": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Wet"
+            ]
+        },
+        "Windchill": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Windchill"
+            ]
+        },
+        "Zombie (moodle)": {
+            "categories": [
+                "Moodles"
+            ],
+            "moodle_id": [
+                "Zombie"
+            ]
+        }
+    },
     "occupation": {
         "Angler": {
             "categories": [
