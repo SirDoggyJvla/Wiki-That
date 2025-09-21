@@ -17,6 +17,7 @@ local moveableDictionary = require "data/WT_moveables"
 local mediaDictionary = require "data/WT_media"
 local traitDictionary = require "data/WT_traits"
 local professionDictionary = require "data/WT_professions"
+local forageDictionary = require "data/WT_forage"
 
 
 ---Get the wiki page for the element.
@@ -49,6 +50,8 @@ function WikiElement:getWikiPage()
         page = traitDictionary[type]
     elseif class == "Profession" then
         page = professionDictionary[type]
+    elseif class == "ForageCategory" then
+        page = forageDictionary[type]
     end
 
     -- early return
@@ -80,7 +83,11 @@ function WikiElement:getName()
     elseif class == "BaseVehicle" then
         ---@cast object BaseVehicle
         local script = object:getScript()
-        name = script:getCarModelName() or script:getName()
+        local carName = script:getCarModelName() or script:getName()
+        name = getText("IGUI_VehicleName" .. carName)
+    elseif class == "ForageCategory" then
+        ---@cast object ForageCategory
+        name = getText("IGUI_ScavengeUI_Title") .. ": " .. getText("IGUI_SearchMode_Categories_" .. self.type)
     elseif object:getName() then
         ---@cast object InventoryItem|Item|Moveable
         name = object:getDisplayName()
@@ -117,6 +124,9 @@ function WikiElement:getIcon()
     elseif class == "Trait" or class == "Profession" then
         ---@cast object Trait|Profession
         icon = object:getTexture()
+    elseif class == "ForageCategory" then
+        icon = getTexture("media/textures/Foraging/pinIcon"..self.type..".png")
+            or getTexture("media/textures/Foraging/pinIconUnknown.png")
     end
 
     -- early return
@@ -142,17 +152,17 @@ function WikiElement:getTooltip()
     local class = self.class
     local object = self.object
     local s = ""
-    if class == "InventoryItem" or class == "Item" or class == "BaseVehicle" or class == "Trait" or class == "Profession" then
-        ---@cast object InventoryItem|Item|BaseVehicle|Trait|Profession
-        local texture = self:getIcon()
-        s = self:getImageTooltip(texture)
-    elseif class == "Fluid" then
+    if class == "Fluid" then
         ---@cast object Fluid
         local color = object:getColor()
         local r,g,b = color:getRedFloat(), color:getGreenFloat(), color:getBlueFloat()
         local w,h = 50,50
 
         s = "<FLUIDBOXCENTRE:"..w..","..h..","..r..","..g..","..b..">\n" .. (self:getName() or "")
+    else
+        ---@cast object InventoryItem|Item|BaseVehicle|Trait|Profession
+        local texture = self:getIcon()
+        s = self:getImageTooltip(texture)
     end
 
     tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)

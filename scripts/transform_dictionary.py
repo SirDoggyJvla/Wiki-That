@@ -2,12 +2,13 @@ import json
 import os
 import requests
 
-def parse_read_to_write(data, r2w):
+def parse_read_to_write(data, r2w, path_to_lua):
     for E in r2w:
         category = E['category']
         id_field = E['id']
         file_name = E['file']
         second_id = E.get('second_id', None)
+        icon = E.get('icon', False)
         print(f"Processing category '{category}' with id field '{id_field}' into file '{file_name}'")
         result = _read_json_entry(data, category, id_field, second_id)
         file_path = os.path.join(path_to_lua, file_name)
@@ -90,7 +91,7 @@ if __name__ == "__main__":
 
     os.makedirs(path_to_lua, exist_ok=True)
 
-    parse_read_to_write(data, read_to_write)
+    parse_read_to_write(data, read_to_write, path_to_lua)
 
 
 

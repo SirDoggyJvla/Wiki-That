@@ -52,6 +52,7 @@
         "category": "foraging_category",
         "id": "category_id",
         "file": "WT_forage.lua",
-        "descriptor": "Foraging category dictionary"
+        "descriptor": "Foraging category dictionary",
+        "icon": true
     }
 ]

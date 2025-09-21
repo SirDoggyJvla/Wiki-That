@@ -48,7 +48,7 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
         end
 
         local fullType = item:getFullType()
-        uniqueItems[fullType] = WikiElement.new(item, fullType, "InventoryItem")
+        uniqueItems[fullType] = WikiElement:new(item, fullType, "InventoryItem")
     end
 
     local uniqueEntries = WT.populateFluidEntries(uniqueItems)
@@ -81,8 +81,8 @@ WT.onFillSearchIconContextMenu = function(context, icon)
     local catDef = icon.catDef
 
     local uniqueEntries = {
-        [itemType] = item,
-        [catDef.name] = catDef,
+        [catDef.name] = WikiElement:new(catDef,catDef.name,"ForageCategory"),
+        [itemType] = WikiElement:new(item, itemType, "Item"),
     }
     printTable(catDef)
     WT.populateDictionary(context, uniqueEntries)
@@ -107,7 +107,7 @@ WT.populateFluidEntries = function(uniqueEntries)
         local fluidLog = WT_utility.getFluidsInFluidContainer(fluidContainer)
         for fluidType, fluid in pairs(fluidLog) do
             fluidType = "Base." .. fluidType
-            uniqueEntries[fluidType] = WikiElement.new(fluid, fluidType, "Fluid")
+            uniqueEntries[fluidType] = WikiElement:new(fluid, fluidType, "Fluid")
         end
     until true end
     return uniqueEntries
@@ -115,7 +115,7 @@ end
 
 ---Populate the context menu with Wiki That for entries from the dictionaries.
 ---@param context ISContextMenu
----@param uniqueEntries table<string, Wikable>
+---@param uniqueEntries table<string, WikiElement>
 WT.populateDictionary = function(context, uniqueEntries)
     local entryCount = WT_utility.lenDict(uniqueEntries)
     if entryCount <= 0 then return end -- skip since nothing to add
@@ -123,11 +123,11 @@ WT.populateDictionary = function(context, uniqueEntries)
     -- handle single entry case
     if entryCount == 1 then
         -- access unique option informations
-        local fullType, entry
+        local fullType, wikiElement
         for k,v in pairs(uniqueEntries) do
-            fullType, entry = k,v
+            fullType, wikiElement = k,v
         end
-        WT.createOptionEntry(context, fullType, entry, true)
+        WT.createOptionEntry(context, wikiElement, true)
 
         return
     end
@@ -139,19 +139,17 @@ WT.populateDictionary = function(context, uniqueEntries)
     context:addSubMenu(optionMain, subMenu)
 
     for fullType, wikiElement in pairs(uniqueEntries) do
-        WT.createOptionEntry(subMenu, fullType, wikiElement)
+        WT.createOptionEntry(subMenu, wikiElement)
     end
 end
 
 ---Create a context menu option entry
 ---@param context ISContextMenu
----@param fullType string
 ---@param wikiElement WikiElement
 ---@param _isMain boolean|nil -- if true, this is the parent option "Wiki That!"
 ---@return table
-WT.createOptionEntry = function(context, fullType, wikiElement, _isMain)
+WT.createOptionEntry = function(context, wikiElement, _isMain)
     local pageName = wikiElement:getWikiPage()
-
     local displayName = wikiElement:getName()
     local tooltipObject = wikiElement:getTooltip()
 
@@ -159,15 +157,14 @@ WT.createOptionEntry = function(context, fullType, wikiElement, _isMain)
     local icon = WT_utility.getOptionIcon(wikiElement, _isMain)
 
     -- create option
-    local optionName = _isMain and getText("IGUI_WikiThat") or displayName or fullType
+    local optionName = _isMain and getText("IGUI_WikiThat") or displayName or wikiElement.type
     local option = context:addOption(optionName, context, WT_utility.openWikiPage, wikiElement) --[[@as table]]
 
     -- special case for fluids to show a fluid icon with the fluid color
-    if instanceof(entry,"Fluid") then
-        ---@cast entry Fluid
-
+    if wikiElement.class == "Fluid" then
+        local object = wikiElement.object --[[@as Fluid]]
         -- set texture and option color field for the fluid color
-        local c = entry:getColor()
+        local c = object:getColor()
         option.color = {
             r = c:getRedFloat(),
             g = c:getGreenFloat(),
