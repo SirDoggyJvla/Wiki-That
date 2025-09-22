@@ -6,7 +6,6 @@ Utility functions
 local WT_utility = {}
 
 ---CACHE
-local WT = require "WT_module"
 local WT_options = require "WT_modOptions"
 
 ---Utility to count entries in a dictionary (key-table).
@@ -46,27 +45,6 @@ WT_utility.getOptionIcon = function(wikiElement, _isMain)
     return wikiElement:getIcon()
 end
 
----Define a tooltip image rich text panel tag for a given texture.
----@FIXME sometimes the texture is just empty for moveables in certain directions (Red Oak Chair)
----@param texture Texture|nil
----@param _setHeight number|nil -- the height of the image (default: 40)
----@return string
-WT_utility.getImageCentre = function(texture, _setHeight)
-    if not texture then return "" end
-    _setHeight = _setHeight or 40
-
-    local width = texture:getWidth()
-    local height = texture:getHeight()
-    local texturePath = string.gsub(texture:getName(), "^.*media", "media")
-
-    -- find proper texture size for the tooltip
-    local ratio = width/height
-    height = _setHeight -- fixed height
-    width = height*ratio -- adjust width
-
-    return "<IMAGECENTRE:"..texturePath..","..width..","..height..">\n"
-end
-
 ---Retrieve every unique fluids contained in the provided fluid container.
 ---@param fluidContainer FluidContainer
 ---@return table
@@ -82,54 +60,6 @@ WT_utility.getFluidsInFluidContainer = function(fluidContainer)
     end
     return fluidLog
 end
-
-
-WT_utility.instanceof = function(obj, className)
-    return string.find(tostring(obj), className) ~= nil
-end
-
-
----Retrieve the name of an entry by first checking the cache.
----@param entry any
----@return string|nil
-WT_utility.getName = function(entry)
-    -- check cache first
-    local cache = WT.cacheNameFetch[entry]
-    if cache then return cache end
-
-    local name = WT_utility.tryGetName(entry)
-    if not name then return nil end
-
-    -- store in cache
-    WT.cacheNameFetch[entry] = name
-    return name
-end
-
----Try to retrieve the display name of an entry.
----@param entry Wikable
----@return string|nil
-WT_utility.tryGetName = function(entry)
-    if instanceof(entry,"Fluid") then
-        ---@cast entry Fluid
-        return entry:getDisplayName()
-    elseif WT_utility.instanceof(entry,"TraitFactory.Trait")
-        or WT_utility.instanceof(entry,"ProfessionFactory.Profession") then
-        ---@cast entry Trait
-        return entry:getLabel()
-    end
-    ---@cast entry -Fluid
-    ---@cast entry -Trait
-    ---@cast entry -Profession
-
-    -- need to check if has name or this can error out in
-    -- cases of entries like vehicles that don't have a name
-    if instanceof(entry,"Fluid") or entry:getName() then
-        return entry:getDisplayName()
-    end
-    return nil
-end
-
-
 
 
 

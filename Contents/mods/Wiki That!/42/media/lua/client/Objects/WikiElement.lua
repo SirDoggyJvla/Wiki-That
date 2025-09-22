@@ -2,10 +2,15 @@
 ---@field object Wikable
 ---@field type string
 ---@field class string
+---@field page string|nil
+---@field name string|nil
+---@field icon Texture|nil
+---@field cachePageFetch table<Wikable, string>
+---@field cacheNameFetch table<Wikable, string>
+---@field wikiPages table<string, table<string, string>>
 local WikiElement = ISBaseObject:derive("WikiElement")
 WikiElement.cachePageFetch = {}
 WikiElement.cacheNameFetch = {}
--- WikiElement.cacheIconFetch = {}
 
 ---CACHE
 local WT_utility = require "WT_utility"
@@ -19,6 +24,19 @@ local traitDictionary = require "data/WT_traits"
 local professionDictionary = require "data/WT_professions"
 local forageDictionary = require "data/WT_forage"
 
+---Class mapping to their dictionary.
+WikiElement.wikiPages = {
+    ["InventoryItem"] = itemDictionary,
+    ["Item"] = itemDictionary,
+    ["Media"] = mediaDictionary,
+    ["Fluid"] = fluidDictionary,
+    ["BaseVehicle"] = vehicleDictionary,
+    ["Moveable"] = moveableDictionary,
+    ["Trait"] = traitDictionary,
+    ["Profession"] = professionDictionary,
+    ["ForageCategory"] = forageDictionary,
+}
+
 
 ---Get the wiki page for the element.
 ---@return string|nil
@@ -28,30 +46,10 @@ function WikiElement:getWikiPage()
     local type = self.type
     local class = self.class
     local page = nil
-    local object = self.object
-    if class == "Moveable" then
-        page = moveableDictionary[type]
-    elseif class == "InventoryItem" then
-        ---@cast object InventoryItem
-        local media = object:getMediaData()
-        if media then
-            local rm_guid = media:getId()
-            page = mediaDictionary[rm_guid]
-        else
-            page = itemDictionary[type]
-        end
-    elseif class == "Item" then
-        page = itemDictionary[type]
-    elseif class == "Fluid" then
-        page = fluidDictionary[type]
-    elseif class == "BaseVehicle" then
-        page = vehicleDictionary[type]
-    elseif class == "Trait" then
-        page = traitDictionary[type]
-    elseif class == "Profession" then
-        page = professionDictionary[type]
-    elseif class == "ForageCategory" then
-        page = forageDictionary[type]
+
+    local category = WikiElement.wikiPages[class]
+    if category then
+        page = category[type]
     end
 
     -- early return
@@ -78,8 +76,6 @@ function WikiElement:getName()
     elseif class == "Trait" or class == "Profession" then
         ---@cast object Trait|Profession
         name = object:getLabel()
-    -- need to check if has name or this can error out in
-    -- cases of entries like vehicles that don't have a name
     elseif class == "BaseVehicle" then
         ---@cast object BaseVehicle
         local script = object:getScript()
@@ -88,7 +84,7 @@ function WikiElement:getName()
     elseif class == "ForageCategory" then
         ---@cast object ForageCategory
         name = getText("IGUI_ScavengeUI_Title") .. ": " .. getText("IGUI_SearchMode_Categories_" .. self.type)
-    elseif object:getName() then
+    else
         ---@cast object InventoryItem|Item|Moveable
         name = object:getDisplayName()
     end
@@ -111,7 +107,7 @@ function WikiElement:getIcon()
     local class = self.class
     local object = self.object
     local icon = nil
-    if class == "InventoryItem" then
+    if class == "InventoryItem" or class == "Media" then
         ---@cast object InventoryItem
         icon = object:getTexture()
     elseif class == "Item" then
@@ -134,7 +130,6 @@ function WikiElement:getIcon()
 
     -- cache
     self.icon = icon
-    -- WikiElement.cacheIconFetch[object] = icon
     return icon
 end
 
@@ -197,7 +192,6 @@ function WikiElement:fetchCache()
     local object = self.object
     self.page = WikiElement.cachePageFetch[object]
     self.name = WikiElement.cacheNameFetch[object]
-    -- self.icon = WikiElement.cacheIconFetch[object]
 end
 
 ---Create a WikiElement instance.

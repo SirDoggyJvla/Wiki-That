@@ -47,23 +47,29 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
             item = item.items[1];
         end
 
-        local fullType = item:getFullType()
-        uniqueItems[fullType] = WikiElement:new(item, fullType, "InventoryItem")
+        local media = item:getMediaData()
+        if media then
+            local rm_guid = media:getId()
+            uniqueItems[rm_guid] = WikiElement:new(item, rm_guid, "Media")
+        else
+            local fullType = item:getFullType()
+            uniqueItems[fullType] = WikiElement:new(item, fullType, "InventoryItem")
+        end
     end
 
-    local uniqueEntries = WT.populateFluidEntries(uniqueItems)
+    local uniqueEntries = WT.fetchFluidEntries(uniqueItems)
     WT.populateDictionary(context, uniqueEntries)
 end
 
-WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
-    ---@TODO: waiting for the wiki pages proper creation to ID animals
-    -- print(animals)
-    -- for i = 1,#animals do
-    --     local animal = animals[i]
-    --     print(animal:getAnimalType())
-    --     print(animal:getFullName())
-    -- end
-end
+---@TODO: waiting for the wiki pages proper creation to ID animals
+-- WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
+--     -- print(animals)
+--     -- for i = 1,#animals do
+--     --     local animal = animals[i]
+--     --     print(animal:getAnimalType())
+--     --     print(animal:getFullName())
+--     -- end
+-- end
 
 WT.onFillSearchIconContextMenu = function(context, icon)
     ---@TODO: are these checks needed ? Was from my hunting mod
@@ -94,7 +100,7 @@ end
 ---Fetch fluid entries from the given dictionary of unique entries and add them to the same dictionary.
 ---@param uniqueEntries table<string, WikiElement>
 ---@return table
-WT.populateFluidEntries = function(uniqueEntries)
+WT.fetchFluidEntries = function(uniqueEntries)
     for _, wikiElement in pairs(uniqueEntries) do repeat
         local entry = wikiElement.object
         if not instanceof(entry,"InventoryItem") then break end
@@ -191,71 +197,3 @@ WT.createOptionEntry = function(context, wikiElement, _isMain)
 
     return option
 end
-
----Retrieve the tooltip for this type of entry
----@param entry Wikable
----@return ISToolTip|nil
-WT.getToolTip = function(entry, fullType)
-    local tooltipObject = ISWorldObjectContextMenu.addToolTip()
-
-    -- inventory item / moveable
-    local s = ""
-    if instanceof(entry,"InventoryItem") then
-        ---@cast entry InventoryItem
-        -- get item texture
-        local texture = entry:getTexture()
-
-        -- draw tooltip
-        local imgString = WT_utility.getImageTooltip(texture)
-        s = imgString .. "<CENTRE>" .. entry:getDisplayName()
-
-    elseif instanceof(entry,"Item") then
-        ---@cast entry Item
-        -- get item texture
-        local texture = entry:getNormalTexture()
-
-        -- draw tooltip
-        local imgString = WT_utility.getImageTooltip(texture)
-        s = imgString .. "<CENTRE>" .. entry:getDisplayName()
-
-    -- fluid
-    elseif instanceof(entry,"Fluid") then
-        ---@cast entry Fluid
-        -- fluid color tooltip
-        local color = entry:getColor()
-        local r,g,b = color:getRedFloat(), color:getGreenFloat(), color:getBlueFloat()
-        local w,h = 50,50
-
-        s = "<FLUIDBOXCENTRE:"..w..","..h..","..r..","..g..","..b..">\n<CENTRE>" .. entry:getDisplayName()
-
-    -- vehicle
-    elseif instanceof(entry,"BaseVehicle") then
-        ---@cast entry BaseVehicle
-
-        -- get item texture
-        local texture = WT_utility.tryGetVehicleIcon(fullType)
-
-        local script = entry:getScript()
-        local carName = script:getCarModelName() or script:getName()
-        local name = getText("IGUI_VehicleName" .. carName)
-
-        -- draw tooltip
-        local imgString = WT_utility.getImageTooltip(texture)
-        s = imgString .. "<CENTRE>" .. name
-
-    elseif WT_utility.instanceof(entry,"TraitFactory.Trait") or WT_utility.instanceof(entry,"ProfessionFactory.Profession") then
-        ---@cast entry Trait/Profession
-        -- get trait icon
-        local texture = entry:getTexture()
-
-        -- draw tooltip
-        local imgString = WT_utility.getImageTooltip(texture)
-        s = imgString .. "<CENTRE>" .. entry:getLabel()
-    end
-
-    tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
-
-    return tooltipObject
-end
-
-
