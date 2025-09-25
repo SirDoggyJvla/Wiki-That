@@ -90,7 +90,6 @@ WT.onFillSearchIconContextMenu = function(context, icon)
         [catDef.name] = WikiElement:new(catDef,catDef.name,"ForageCategory"),
         [itemType] = WikiElement:new(item, itemType, "Item"),
     }
-    printTable(catDef)
     WT.populateDictionary(context, uniqueEntries)
 end
 

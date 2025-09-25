@@ -68,7 +68,7 @@ end
 ---@param pageName PageName
 ---@return URL
 WT_utility.pageNameToUrl = function(pageName)
-    return "https://steamcommunity.com/linkfilter/?u=https://pzwiki.net/wiki/" .. pageName
+    return "https://pzwiki.net/wiki/" .. pageName
 end
 
 --- Opens the wiki page for a given page name. Checks if the Steam overlay is
