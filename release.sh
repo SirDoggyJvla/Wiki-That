@@ -1,1 +1,0 @@
-./SteamUploader -a 108600 -w 3567109091 -d /home/simon/Zomboid/Workshop/Wiki-That/description.bbcode -P /home/simon/Zomboid/Workshop/Wiki-That/patch_note.bbcode -c /home/simon/Zomboid/Workshop/Wiki-That/Contents
