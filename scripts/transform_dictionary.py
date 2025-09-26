@@ -27,16 +27,62 @@ def _read_json_entry(data, category, id_field, second_id=None):
     result = {}
     for page_name, entry in data.get(category, {}).items():
         id = entry.get(id_field)
-        if id:
-            for i in id:
-                if second_id is None:
-                    result[i] = page_name
-                else:
-                    for s in entry.get(second_id, []):
-                        kwargs = {second_id: s}
-                        formated_id = i.format(**kwargs)
-                        result[formated_id] = page_name
+        
+        if id is None:
+            continue
+        
+        # elif category == "tile":
+            # print(id, second_id)
+        
+        for i in id:
+            if second_id is not None:
+                print(i, page_name)
+                for s in entry.get(second_id, []):
+                    kwargs = {second_id: s}
+                    formated_id = i.format(**kwargs)
+                    
+                    # id can be:
+                    # the_id_10+11+12+13
+                    # need to split by + and format to have:
+                    # the_id_10  the_id_11  the_id_12  the_id_13
+                    if '+'  in formated_id:
+                        ids = format_multi_tile_id(formated_id)
+                        for the_id in ids:
+                            result[the_id] = page_name
+                        continue # end multi id case
+                    
+                    result[formated_id] = page_name
+                continue # end second id case
+        
+            # if category == "tile":
+            # print(i, page_name)
+            
+            result[i] = page_name
+                
     return result
+
+
+def format_multi_tile_id(formated_id):
+    ids = []
+    
+    print(formated_id)
+    parts = formated_id.split('+')
+    
+    early_part = parts[0].split('_')[0:-1]
+    early_part = '_'.join(early_part) + '_'
+    print(early_part)
+    
+    for part in parts:
+        part = part.split('_')[-1]
+        part = early_part + part
+        print(part)
+        
+        
+        
+        ids.append(part)
+        
+    return ids
+
 
 def _dict_to_lua_table(d, file_path, descriptor=None):
     with open(file_path, 'w', encoding='utf-8') as f:
