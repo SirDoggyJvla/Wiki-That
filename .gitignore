@@ -1,1 +1,5 @@
 .vscode
+.ignore
+
+# Upload files
+steam_appid.txt

@@ -50,10 +50,10 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
         local media = item:getMediaData()
         if media then
             local rm_guid = media:getId()
-            uniqueItems[rm_guid] = WikiElement:new(item, rm_guid, "Media")
+            uniqueItems["Media."..rm_guid] = WikiElement:new(item, rm_guid, "Media")
         else
             local fullType = item:getFullType()
-            uniqueItems[fullType] = WikiElement:new(item, fullType, "InventoryItem")
+            uniqueItems["InventoryItem."..fullType] = WikiElement:new(item, fullType, "InventoryItem")
         end
     end
 
@@ -87,8 +87,8 @@ WT.onFillSearchIconContextMenu = function(context, icon)
     local catDef = icon.catDef
 
     local uniqueEntries = {
-        [catDef.name] = WikiElement:new(catDef,catDef.name,"ForageCategory"),
-        [itemType] = WikiElement:new(item, itemType, "Item"),
+        ["ForageCategory."..catDef.name] = WikiElement:new(catDef,catDef.name,"ForageCategory"),
+        ["Item."..itemType] = WikiElement:new(item, itemType, "Item"),
     }
     WT.populateDictionary(context, uniqueEntries)
 end
@@ -112,7 +112,7 @@ WT.fetchFluidEntries = function(uniqueEntries)
         local fluidLog = WT_utility.getFluidsInFluidContainer(fluidContainer)
         for fluidType, fluid in pairs(fluidLog) do
             fluidType = "Base." .. fluidType
-            uniqueEntries[fluidType] = WikiElement:new(fluid, fluidType, "Fluid")
+            uniqueEntries["Fluid."..fluidType] = WikiElement:new(fluid, fluidType, "Fluid")
         end
     until true end
     return uniqueEntries
