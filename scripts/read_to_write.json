@@ -25,6 +25,12 @@
         "descriptor": "Moveable dictionary"
     },
     {
+        "category": "tile",
+        "id": "crop_id",
+        "file": "WT_crops.lua",
+        "descriptor": "Crop dictionary"
+    },
+    {
         "category": "item",
         "id": "rm_guid",
         "file": "WT_media.lua",
@@ -44,7 +50,7 @@
     },
     {
         "category": "animal",
-        "id": "animal_id",
+        "id": "full_breed_id",
         "file": "WT_animals.lua",
         "descriptor": "Animal dictionary"
     },
@@ -52,7 +58,6 @@
         "category": "foraging_category",
         "id": "category_id",
         "file": "WT_forage.lua",
-        "descriptor": "Foraging category dictionary",
-        "icon": true
+        "descriptor": "Foraging category dictionary"
     }
 ]

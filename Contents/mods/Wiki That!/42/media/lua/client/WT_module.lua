@@ -1,7 +1,7 @@
 ---@alias URL string
 ---@alias PageName string
 ---@alias ForageCategory table
----@alias Wikable InventoryItem|Item|Fluid|BaseVehicle|Moveable|Trait|Profession|ForageCategory
+---@alias Wikable InventoryItem|Item|Fluid|BaseVehicle|Moveable|Trait|Profession|ForageCategory|IsoAnimal
 
 local WT = {
     backgroundColor_highlight = {r=0.48, g=0.07, b=0.09, a=1},

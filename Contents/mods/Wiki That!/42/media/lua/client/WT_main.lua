@@ -62,14 +62,16 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 end
 
 ---@TODO: waiting for the wiki pages proper creation to ID animals
--- WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
---     -- print(animals)
---     -- for i = 1,#animals do
---     --     local animal = animals[i]
---     --     print(animal:getAnimalType())
---     --     print(animal:getFullName())
---     -- end
--- end
+WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
+    local uniqueEntries = {}
+    for i = 1,#animals do
+        local animal = animals[i] --[[@as IsoAnimal]]
+        local fullType = animal:getAnimalType() .. animal:getBreed():getName()
+
+        uniqueEntries[fullType] = WikiElement:new(animal, fullType, "Animal")
+    end
+    WT.populateDictionary(context, uniqueEntries)
+end
 
 WT.onFillSearchIconContextMenu = function(context, icon)
     ---@TODO: are these checks needed ? Was from my hunting mod
@@ -128,9 +130,10 @@ WT.populateDictionary = function(context, uniqueEntries)
     -- handle single entry case
     if entryCount == 1 then
         -- access unique option informations
-        local fullType, wikiElement
-        for k,v in pairs(uniqueEntries) do
-            fullType, wikiElement = k,v
+        local wikiElement
+        for _,v in pairs(uniqueEntries) do
+            print(_)
+            wikiElement = v
         end
         WT.createOptionEntry(context, wikiElement, true)
 

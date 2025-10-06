@@ -4,11 +4,11 @@ import requests
 
 def parse_read_to_write(data, r2w, path_to_lua):
     for E in r2w:
+        print(E)
         category = E['category']
         id_field = E['id']
         file_name = E['file']
         second_id = E.get('second_id', None)
-        icon = E.get('icon', False)
         print(f"Processing category '{category}' with id field '{id_field}' into file '{file_name}'")
         result = _read_json_entry(data, category, id_field, second_id)
         file_path = os.path.join(path_to_lua, file_name)
@@ -23,20 +23,24 @@ def _download_dictionary():
     else:
         raise Exception(f"Failed to download file: {response.status_code}")
 
-def _read_json_entry(data, category, id_field, second_id=None):
+def _read_json_entry(data, category, id_field, second_id=None, multi_id=None):
     result = {}
-    for page_name, entry in data.get(category, {}).items():
-        id = entry.get(id_field)
+
+    # check if category exists, if it doesn't it's not normal behavior
+    if category not in data:
+        raise ValueError(f"Category '{category}' not found in data.")
+
+    # parse each entry in the specified category
+    for page_name, entry in data[category].items():
+        id = entry.get(id_field) # this retrieves a list
         
         if id is None:
             continue
-        
-        # elif category == "tile":
-            # print(id, second_id)
-        
+
+        # parse every id in the list
         for i in id:
+            # handle second id formatting
             if second_id is not None:
-                print(i, page_name)
                 for s in entry.get(second_id, []):
                     kwargs = {second_id: s}
                     formated_id = i.format(**kwargs)
@@ -53,38 +57,56 @@ def _read_json_entry(data, category, id_field, second_id=None):
                     
                     result[formated_id] = page_name
                 continue # end second id case
-        
-            # if category == "tile":
-            # print(i, page_name)
-            
+
+            # handle multi id formatting
+            elif multi_id is not None:
+                0
+
             result[i] = page_name
                 
     return result
 
 
-def format_multi_tile_id(formated_id):
-    ids = []
-    
-    print(formated_id)
-    parts = formated_id.split('+')
-    
+def format_multi_tile_id(id):
+    """
+    Format a multi-tile ID into individual IDs.
+    An ID can be like: `the_id_10+11+12+13`.
+    This function will split it into:
+    - the_id_10
+    - the_id_11
+    - the_id_12
+    - the_id_13
+
+    Args:
+        id (str): The formatted multi-tile ID string.
+
+    Returns:
+        list: List of individual tile ID strings.
+    """
+    # prepare parts
+    parts = id.split('+')
     early_part = parts[0].split('_')[0:-1]
     early_part = '_'.join(early_part) + '_'
-    print(early_part)
-    
+
+    # for each parts, format it to a proper ID
+    ids = []
     for part in parts:
         part = part.split('_')[-1]
         part = early_part + part
-        print(part)
-        
-        
-        
         ids.append(part)
         
     return ids
 
 
 def _dict_to_lua_table(d, file_path, descriptor=None):
+    """
+    Format a Python dictionary to a Lua table in a file.
+
+    Args:
+        d (dict): The dictionary to convert.
+        file_path (str): Path to the output Lua file.
+        descriptor (str, optional): Description to add as a comment. Defaults to None.
+    """
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(f'-- THIS FILE IS AUTO-GENERATED. DO NOT EDIT MANUALLY.\n')
         if descriptor:

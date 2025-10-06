@@ -23,6 +23,7 @@ local mediaDictionary = require "data/WT_media"
 local traitDictionary = require "data/WT_traits"
 local professionDictionary = require "data/WT_professions"
 local forageDictionary = require "data/WT_forage"
+local animalDictionary = require "data/WT_animals"
 
 ---Class mapping to their dictionary.
 WikiElement.wikiPages = {
@@ -35,6 +36,7 @@ WikiElement.wikiPages = {
     ["Trait"] = traitDictionary,
     ["Profession"] = professionDictionary,
     ["ForageCategory"] = forageDictionary,
+    ["Animal"] = animalDictionary,
 }
 
 
@@ -84,6 +86,10 @@ function WikiElement:getName()
     elseif class == "ForageCategory" then
         ---@cast object ForageCategory
         name = getText("IGUI_ScavengeUI_Title") .. ": " .. getText("IGUI_SearchMode_Categories_" .. self.type)
+    elseif class == "Animal" then
+        ---@cast object IsoAnimal
+        name = object:getFullName()
+
     else
         ---@cast object InventoryItem|Item|Moveable
         name = object:getDisplayName()
@@ -123,6 +129,9 @@ function WikiElement:getIcon()
     elseif class == "ForageCategory" then
         icon = getTexture("media/textures/Foraging/pinIcon"..self.type..".png")
             or getTexture("media/textures/Foraging/pinIconUnknown.png")
+    elseif class == "Animal" then
+        ---@cast object IsoAnimal
+        icon = object:getInventoryIconTexture()
     end
 
     -- early return
