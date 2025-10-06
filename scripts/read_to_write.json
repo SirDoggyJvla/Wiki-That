@@ -26,9 +26,16 @@
     },
     {
         "category": "tile",
+        "id": "sprite_id",
+        "file": "WT_tiles.lua",
+        "descriptor": "Tile dictionary"
+    },
+    {
+        "category": "tile",
         "id": "crop_id",
         "file": "WT_crops.lua",
-        "descriptor": "Crop dictionary"
+        "descriptor": "Crop dictionary",
+        "phantom_table": "__sprites__"
     },
     {
         "category": "item",

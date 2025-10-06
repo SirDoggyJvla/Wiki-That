@@ -1,6 +1,9 @@
 -- THIS FILE IS AUTO-GENERATED. DO NOT EDIT MANUALLY.
 -- Crop dictionary
 return {
+    ["__sprites__"] = {
+        -- This is a phantom table to store additional mappings.
+    },
     ["Barley"] = "Barley (crop)",
     ["Basil"] = "Basil (crop)",
     ["BellPepper"] = "Bell Pepper (crop)",

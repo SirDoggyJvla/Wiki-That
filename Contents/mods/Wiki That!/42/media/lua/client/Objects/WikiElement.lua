@@ -19,11 +19,13 @@ local itemDictionary = require "data/WT_items"
 local fluidDictionary = require "data/WT_fluids"
 local vehicleDictionary = require "data/WT_vehicles"
 local moveableDictionary = require "data/WT_moveables"
+local tileDictionary = require "data/WT_tiles"
 local mediaDictionary = require "data/WT_media"
 local traitDictionary = require "data/WT_traits"
 local professionDictionary = require "data/WT_professions"
 local forageDictionary = require "data/WT_forage"
 local animalDictionary = require "data/WT_animals"
+local cropDictionary = require "data/WT_crops"
 
 ---Class mapping to their dictionary.
 WikiElement.wikiPages = {
@@ -33,10 +35,12 @@ WikiElement.wikiPages = {
     ["Fluid"] = fluidDictionary,
     ["BaseVehicle"] = vehicleDictionary,
     ["Moveable"] = moveableDictionary,
+    ["Tile"] = tileDictionary,
     ["Trait"] = traitDictionary,
     ["Profession"] = professionDictionary,
     ["ForageCategory"] = forageDictionary,
     ["Animal"] = animalDictionary,
+    ["Crop"] = cropDictionary,
 }
 
 
@@ -45,13 +49,11 @@ WikiElement.wikiPages = {
 function WikiElement:getWikiPage()
     if self.page then return self.page end
 
-    local type = self.type
-    local class = self.class
     local page = nil
-
-    local category = WikiElement.wikiPages[class]
+    local category = WikiElement.wikiPages[self.class]
     if category then
-        page = category[type]
+        print(self.type)
+        page = category[self.type]
     end
 
     -- early return
@@ -89,6 +91,12 @@ function WikiElement:getName()
     elseif class == "Animal" then
         ---@cast object IsoAnimal
         name = object:getFullName()
+    elseif class == "Crop" or class == "Moveable" or class == "Tile" then
+        ---@cast object IsoObject
+        local category = WikiElement.wikiPages[class]
+        if category then
+            name = category[self.type]
+        end
 
     else
         ---@cast object InventoryItem|Item|Moveable
@@ -113,7 +121,7 @@ function WikiElement:getIcon()
     local class = self.class
     local object = self.object
     local icon = nil
-    if class == "InventoryItem" or class == "Media" then
+    if class == "InventoryItem" or class == "Media" or class == "Moveable" then
         ---@cast object InventoryItem
         icon = object:getTexture()
     elseif class == "Item" then
@@ -132,6 +140,11 @@ function WikiElement:getIcon()
     elseif class == "Animal" then
         ---@cast object IsoAnimal
         icon = object:getInventoryIconTexture()
+    elseif class == "Crop" then
+        ---@cast object IsoObject
+        local cropProperties = farming_vegetableconf.props[self.type]
+        local iconID = cropProperties.icon -- this gives "Item_{scriptIcon}"
+        icon = getTexture("media/textures/"..iconID)
     end
 
     -- early return

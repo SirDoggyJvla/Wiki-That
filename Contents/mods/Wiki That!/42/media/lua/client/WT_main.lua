@@ -3,6 +3,7 @@ local WT = require "WT_module"
 local WT_utility = require "WT_utility"
 local WT_pages = require "WT_pages"
 local WikiElement = require "Objects/WikiElement"
+local cropDictionary = require "data/WT_crops"
 -- reset pool
 WT.tooltipPool = {}
 WT.tooltipsUsed = {}
@@ -51,6 +52,9 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
         if media then
             local rm_guid = media:getId()
             uniqueItems["Media."..rm_guid] = WikiElement:new(item, rm_guid, "Media")
+        elseif instanceof(item, "Moveable") then
+            local spriteID = "Moveables."..item:getWorldSprite()
+            uniqueItems[spriteID] = WikiElement:new(item, spriteID, "Moveable")
         else
             local fullType = item:getFullType()
             uniqueItems["InventoryItem."..fullType] = WikiElement:new(item, fullType, "InventoryItem")
@@ -95,8 +99,28 @@ WT.onFillSearchIconContextMenu = function(context, icon)
     WT.populateDictionary(context, uniqueEntries)
 end
 
+WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, test)
+    local objects = {}
+    for i=1, #worldObjects do
+        objects[worldObjects[i]] = true
+    end
 
+    local uniqueEntries = {}
+    for object, _ in pairs(objects) do
+        local sprite = object:getSprite()
+        local spriteID = sprite:getName()
+        print(spriteID)
 
+        local cropID = cropDictionary.__sprites__[spriteID]
+        print(cropID)
+        if cropID then
+            uniqueEntries[cropID] = WikiElement:new(object, cropID, "Crop")
+        else
+            uniqueEntries[spriteID] = WikiElement:new(object, spriteID, "Tile")
+        end
+    end
+    WT.populateDictionary(context, uniqueEntries)
+end
 
 ---Fetch fluid entries from the given dictionary of unique entries and add them to the same dictionary.
 ---@param uniqueEntries table<string, WikiElement>

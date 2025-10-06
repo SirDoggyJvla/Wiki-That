@@ -4,7 +4,6 @@ import requests
 
 def parse_read_to_write(data, r2w, path_to_lua):
     for E in r2w:
-        print(E)
         category = E['category']
         id_field = E['id']
         file_name = E['file']
@@ -12,7 +11,7 @@ def parse_read_to_write(data, r2w, path_to_lua):
         print(f"Processing category '{category}' with id field '{id_field}' into file '{file_name}'")
         result = _read_json_entry(data, category, id_field, second_id)
         file_path = os.path.join(path_to_lua, file_name)
-        _dict_to_lua_table(result, file_path, descriptor=E.get('descriptor', None))
+        _dict_to_lua_table(result, file_path, descriptor=E.get('descriptor', None), E=E)
 
 def _download_dictionary():
     url = "https://raw.githubusercontent.com/Vaileasys/pz-wiki_parser/main/resources/page_dictionary.json"
@@ -49,7 +48,7 @@ def _read_json_entry(data, category, id_field, second_id=None, multi_id=None):
                     # the_id_10+11+12+13
                     # need to split by + and format to have:
                     # the_id_10  the_id_11  the_id_12  the_id_13
-                    if '+'  in formated_id:
+                    if '+' in formated_id:
                         ids = format_multi_tile_id(formated_id)
                         for the_id in ids:
                             result[the_id] = page_name
@@ -58,9 +57,11 @@ def _read_json_entry(data, category, id_field, second_id=None, multi_id=None):
                     result[formated_id] = page_name
                 continue # end second id case
 
-            # handle multi id formatting
-            elif multi_id is not None:
-                0
+            if '+' in i:
+                ids = format_multi_tile_id(i)
+                for the_id in ids:
+                    result[the_id] = page_name
+                continue # end multi id case
 
             result[i] = page_name
                 
@@ -98,7 +99,7 @@ def format_multi_tile_id(id):
     return ids
 
 
-def _dict_to_lua_table(d, file_path, descriptor=None):
+def _dict_to_lua_table(d, file_path, descriptor=None, E=None):
     """
     Format a Python dictionary to a Lua table in a file.
 
@@ -112,6 +113,11 @@ def _dict_to_lua_table(d, file_path, descriptor=None):
         if descriptor:
             f.write(f'-- {descriptor}\n')
         f.write('return {\n')
+        if "phantom_table" in E:
+            phantom_table = E["phantom_table"]
+            f.write(f'    ["{phantom_table}"] = {{\n')
+            f.write('        -- This is a phantom table to store additional mappings.\n')
+            f.write('    },\n')
         for key, value in d.items():
             if isinstance(value, dict):
                 f.write(f'    ["{key}"] = {{\n')
