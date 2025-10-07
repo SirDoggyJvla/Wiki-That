@@ -28,7 +28,7 @@ WT.OnInitGlobalModData = function(newGame)
     WT.cacheNameFetch = {}
 end
 
----Add a single context menu option "Wiki That!" to the inventory context menu.
+---Handle Wiki That for inventory items. Detect the type of item if media, moveable or classic item. Also check if the item entries have fluid containers, and if so add the fluids to the elements too.
 ---@param playerIndex integer
 ---@param context ISContextMenu
 ---@param items table
@@ -42,19 +42,24 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
     local uniqueItems = {}
 
 	for i = 1,#items do
-		-- retrieve the item
+		-- retrieve a unique item, no need to check the ones of the same type
 		local item = items[i]
 		if not instanceof(item, "InventoryItem") then
             item = item.items[1];
         end
 
+        -- check if item has media data
         local media = item:getMediaData()
         if media then
             local rm_guid = media:getId()
             uniqueItems["Media."..rm_guid] = WikiElement:new(item, rm_guid, "Media")
+
+        -- check if item is a moveable item aka tile in InventoryItem form
         elseif instanceof(item, "Moveable") then
             local spriteID = "Moveables."..item:getWorldSprite()
             uniqueItems[spriteID] = WikiElement:new(item, spriteID, "Moveable")
+
+        -- handle classic item case
         else
             local fullType = item:getFullType()
             uniqueItems["InventoryItem."..fullType] = WikiElement:new(item, fullType, "InventoryItem")
@@ -65,14 +70,16 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
     WT.populateDictionary(context, uniqueEntries)
 end
 
----@TODO: waiting for the wiki pages proper creation to ID animals
+---Handle context menu for animals.
+---@param playerIndex integer
+---@param context ISContextMenu
+---@param animals table<IsoAnimal>
 WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
     local uniqueEntries = {}
     for i = 1,#animals do
         local animal = animals[i] --[[@as IsoAnimal]]
-        local fullType = animal:getAnimalType() .. animal:getBreed():getName()
-
-        uniqueEntries[fullType] = WikiElement:new(animal, fullType, "Animal")
+        local fullType, wikiElement = WT.createAnimalEntry(animal)
+        uniqueEntries[fullType] = wikiElement
     end
     WT.populateDictionary(context, uniqueEntries)
 end
@@ -99,27 +106,65 @@ WT.onFillSearchIconContextMenu = function(context, icon)
     WT.populateDictionary(context, uniqueEntries)
 end
 
+---Handle context menu for world objects. Detect if the object is a crop or a tile.
+---@param playerNum any
+---@param context any
+---@param worldObjects any
+---@param test any
 WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, test)
+    print("OnFillWorldObjectContextMenu")
     local objects = {}
     for i=1, #worldObjects do
         objects[worldObjects[i]] = true
     end
 
+    -- retrieve wiki elements from world objects
     local uniqueEntries = {}
-    for object, _ in pairs(objects) do
-        local sprite = object:getSprite()
-        local spriteID = sprite:getName()
-        print(spriteID)
-
+    for object, _ in pairs(objects) do repeat
+        -- get object info
+        local spriteID = object:getSprite():getName()
         local cropID = cropDictionary.__sprites__[spriteID]
-        print(cropID)
+
+        -- crop or simple tile
         if cropID then
             uniqueEntries[cropID] = WikiElement:new(object, cropID, "Crop")
         else
-            uniqueEntries[spriteID] = WikiElement:new(object, spriteID, "Tile")
+            ---@TODO: switch _hideIfNoPage to true here
+            uniqueEntries[spriteID] = WikiElement:new(object, spriteID, "Tile", true)
         end
+
+        -- check the square for animals or vehicles
+        local square = object:getSquare()
+        if not square then break end
+
+        -- handle animals
+        local animals = square:getAnimals()
+        for i = 0, animals:size()-1 do
+            local animal = animals:get(i)
+            local fullType, wikiElement = WT.createAnimalEntry(animal)
+            uniqueEntries[fullType] = wikiElement
+        end
+    until true end
+
+    -- populate vehicle entries from the current vehicles
+    for i = 1, #WT.currentVehicles do
+        local vehicle = WT.currentVehicles[i]
+        local fullType, wikiElement = WT.createVehicleEntry(vehicle)
+        uniqueEntries[fullType] = wikiElement
     end
+    WT.currentVehicles = {} -- reset table for next world right click
+
     WT.populateDictionary(context, uniqueEntries)
+end
+
+WT.createAnimalEntry = function(animal)
+    local fullType = animal:getAnimalType() .. animal:getBreed():getName()
+    return fullType, WikiElement:new(animal, fullType, "IsoAnimal")
+end
+
+WT.createVehicleEntry = function(vehicle)
+    local fullType = vehicle:getScript():getFullType()
+    return "BaseVehicle."..fullType, WikiElement:new(vehicle, fullType, "BaseVehicle")
 end
 
 ---Fetch fluid entries from the given dictionary of unique entries and add them to the same dictionary.
@@ -148,15 +193,20 @@ end
 ---@param context ISContextMenu
 ---@param uniqueEntries table<string, WikiElement>
 WT.populateDictionary = function(context, uniqueEntries)
-    local entryCount = WT_utility.lenDict(uniqueEntries)
-    if entryCount <= 0 then return end -- skip since nothing to add
+    -- count valid entries and filter out invalid ones
+    local entryCount, uniqueEntries = WT_utility.countValidElements(uniqueEntries)
+
+    -- handle no entry case, we still want to show Wiki That in the menu
+    if entryCount <= 0 then
+        uniqueEntries["__EMPTY__"] = WikiElement:new(nil, nil, "__EMPTY__")
+        entryCount = 1
+    end
 
     -- handle single entry case
-    if entryCount == 1 then
+    if entryCount <= 1 then
         -- access unique option informations
         local wikiElement
         for _,v in pairs(uniqueEntries) do
-            print(_)
             wikiElement = v
         end
         WT.createOptionEntry(context, wikiElement, true)

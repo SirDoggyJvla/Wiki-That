@@ -2,6 +2,7 @@
 ---@field object Wikable
 ---@field type string
 ---@field class string
+---@field _hideIfNoPage boolean
 ---@field page string|nil
 ---@field name string|nil
 ---@field icon Texture|nil
@@ -39,7 +40,7 @@ WikiElement.wikiPages = {
     ["Trait"] = traitDictionary,
     ["Profession"] = professionDictionary,
     ["ForageCategory"] = forageDictionary,
-    ["Animal"] = animalDictionary,
+    ["IsoAnimal"] = animalDictionary,
     ["Crop"] = cropDictionary,
 }
 
@@ -47,12 +48,12 @@ WikiElement.wikiPages = {
 ---Get the wiki page for the element.
 ---@return string|nil
 function WikiElement:getWikiPage()
+    if self.class == "__EMPTY__" then return nil end -- empty WikiElement
     if self.page then return self.page end
 
     local page = nil
     local category = WikiElement.wikiPages[self.class]
     if category then
-        print(self.type)
         page = category[self.type]
     end
 
@@ -69,6 +70,7 @@ end
 ---Get the object name.
 ---@return string|nil
 function WikiElement:getName()
+    if self.class == "__EMPTY__" then return nil end -- empty WikiElement
     if self.name then return self.name end
 
     local name = nil
@@ -88,7 +90,7 @@ function WikiElement:getName()
     elseif class == "ForageCategory" then
         ---@cast object ForageCategory
         name = getText("IGUI_ScavengeUI_Title") .. ": " .. getText("IGUI_SearchMode_Categories_" .. self.type)
-    elseif class == "Animal" then
+    elseif class == "IsoAnimal" then
         ---@cast object IsoAnimal
         name = object:getFullName()
     elseif class == "Crop" or class == "Moveable" or class == "Tile" then
@@ -97,7 +99,6 @@ function WikiElement:getName()
         if category then
             name = category[self.type]
         end
-
     else
         ---@cast object InventoryItem|Item|Moveable
         name = object:getDisplayName()
@@ -116,6 +117,7 @@ end
 ---Get the icon texture of the element.
 ---@return Texture|nil
 function WikiElement:getIcon()
+    if self.class == "__EMPTY__" then return nil end -- empty WikiElement
     if self.icon then return self.icon end
 
     local class = self.class
@@ -128,7 +130,8 @@ function WikiElement:getIcon()
         ---@cast object Item
         icon = object:getNormalTexture()
     elseif class == "BaseVehicle" then
-        icon = self:getVehicleIcon()
+        local type = WT_utility.split(self.type, ".")[2] or nil
+        icon = type and getTexture("media/ui/vehicle_icons/" .. type .. "_Model.png") or nil
     elseif class == "Fluid" then
         icon = getTexture("Item_Waterdrop_Grey.png")
     elseif class == "Trait" or class == "Profession" then
@@ -137,7 +140,7 @@ function WikiElement:getIcon()
     elseif class == "ForageCategory" then
         icon = getTexture("media/textures/Foraging/pinIcon"..self.type..".png")
             or getTexture("media/textures/Foraging/pinIconUnknown.png")
-    elseif class == "Animal" then
+    elseif class == "IsoAnimal" then
         ---@cast object IsoAnimal
         icon = object:getInventoryIconTexture()
     elseif class == "Crop" then
@@ -154,14 +157,6 @@ function WikiElement:getIcon()
     self.icon = icon
     return icon
 end
-
----Method to retrieve the vehicle icon texture.
----@return Texture|nil
-function WikiElement:getVehicleIcon()
-    local type = WT_utility.split(self.type, ".")[2] or nil
-    return type and getTexture("media/ui/vehicle_icons/" .. type .. "_Model.png") or nil
-end
-
 
 function WikiElement:getTooltip()
     local tooltipObject = ISWorldObjectContextMenu.addToolTip()
@@ -220,8 +215,9 @@ end
 ---@param object Wikable
 ---@param type string
 ---@param class string
----@return WikiElement instance
-function WikiElement:new(object, type, class)
+---@param _hideIfNoPage boolean|nil -- if true, don't create the element if no wiki page is found
+---@return WikiElement|nil instance
+function WikiElement:new(object, type, class, _hideIfNoPage)
     local o = {}
     setmetatable(o, self)
     self.__index = self
@@ -229,6 +225,11 @@ function WikiElement:new(object, type, class)
     o.object = object
     o.type = type
     o.class = class
+    o._hideIfNoPage = _hideIfNoPage or false
+
+    -- if _hideIfNoPage then
+    --     o:getWikiPage() -- force fetch of the wiki page for the checks
+    -- end
 
     -- retrieve informations already previously cached about this object
     o:fetchCache()

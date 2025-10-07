@@ -7,6 +7,7 @@ local WT_utility = {}
 
 ---CACHE
 local WT_options = require "WT_modOptions"
+local WikiElement = require "Objects/WikiElement"
 
 ---Utility to count entries in a dictionary (key-table).
 ---@param dict table
@@ -18,6 +19,20 @@ WT_utility.lenDict = function(dict)
     end
     return i
 end
+
+---Utility to count valid WikiElements in the dictionary to show.
+---@param dict table<string, WikiElement>
+WT_utility.countValidElements = function(dict)
+    local validElements = {}
+    for id, wikiElement in pairs(dict) do
+        if not wikiElement._hideIfNoPage or wikiElement:getWikiPage() then
+            validElements[id] = wikiElement
+        end
+    end
+
+    return WT_utility.lenDict(validElements), validElements
+end
+
 
 ---Helper split function from https://stackoverflow.com/a/7615129
 ---@param inputstr string
@@ -61,6 +76,7 @@ WT_utility.getFluidsInFluidContainer = function(fluidContainer)
     return fluidLog
 end
 
+-- WT_utility.getVehiclesOnCursor = function()
 
 
 

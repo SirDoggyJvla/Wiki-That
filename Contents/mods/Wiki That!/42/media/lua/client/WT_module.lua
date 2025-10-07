@@ -11,6 +11,8 @@ local WT = {
 
     cachePageFetch = {},
     cacheNameFetch = {},
+
+    currentVehicles = {},
 }
 
 return WT
