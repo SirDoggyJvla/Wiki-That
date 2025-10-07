@@ -148,6 +148,10 @@ function WikiElement:getIcon()
         local cropProperties = farming_vegetableconf.props[self.type]
         local iconID = cropProperties.icon -- this gives "Item_{scriptIcon}"
         icon = getTexture("media/textures/"..iconID)
+    elseif class == "Tile" then
+        ---@cast object IsoObject
+        local sprite = object:getSprite()
+        icon = sprite:getTextureForCurrentFrame(object:getDir())
     end
 
     -- early return

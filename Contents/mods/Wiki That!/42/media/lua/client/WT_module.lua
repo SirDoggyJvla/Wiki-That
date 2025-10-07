@@ -12,7 +12,8 @@ local WT = {
     cachePageFetch = {},
     cacheNameFetch = {},
 
-    currentVehicles = {},
+    selectedVehicles = {},
+    selectedAnimals = {},
 }
 
 return WT

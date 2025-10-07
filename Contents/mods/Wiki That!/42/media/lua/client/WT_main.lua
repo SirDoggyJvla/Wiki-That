@@ -75,13 +75,10 @@ end
 ---@param context ISContextMenu
 ---@param animals table<IsoAnimal>
 WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
-    local uniqueEntries = {}
     for i = 1,#animals do
         local animal = animals[i] --[[@as IsoAnimal]]
-        local fullType, wikiElement = WT.createAnimalEntry(animal)
-        uniqueEntries[fullType] = wikiElement
+        table.insert(WT.selectedAnimals, animal) -- store for use in the world object context menu
     end
-    WT.populateDictionary(context, uniqueEntries)
 end
 
 WT.onFillSearchIconContextMenu = function(context, icon)
@@ -107,12 +104,14 @@ WT.onFillSearchIconContextMenu = function(context, icon)
 end
 
 ---Handle context menu for world objects. Detect if the object is a crop or a tile.
+---Also uses the selected vehicles and animals from the previous context menu events to add them too.
+---
+---The events used are `OnClickedAnimalForContext` and a hook to `ISVehicleMenu.FillMenuOutsideVehicle`.
 ---@param playerNum any
 ---@param context any
 ---@param worldObjects any
 ---@param test any
 WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, test)
-    print("OnFillWorldObjectContextMenu")
     local objects = {}
     for i=1, #worldObjects do
         objects[worldObjects[i]] = true
@@ -132,27 +131,23 @@ WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, tes
             ---@TODO: switch _hideIfNoPage to true here
             uniqueEntries[spriteID] = WikiElement:new(object, spriteID, "Tile", true)
         end
-
-        -- check the square for animals or vehicles
-        local square = object:getSquare()
-        if not square then break end
-
-        -- handle animals
-        local animals = square:getAnimals()
-        for i = 0, animals:size()-1 do
-            local animal = animals:get(i)
-            local fullType, wikiElement = WT.createAnimalEntry(animal)
-            uniqueEntries[fullType] = wikiElement
-        end
     until true end
 
-    -- populate vehicle entries from the current vehicles
-    for i = 1, #WT.currentVehicles do
-        local vehicle = WT.currentVehicles[i]
+    -- populate animal entries from the selected animals
+    for i = 1, #WT.selectedAnimals do
+        local animal = WT.selectedAnimals[i]
+        local fullType, wikiElement = WT.createAnimalEntry(animal)
+        uniqueEntries[fullType] = wikiElement
+    end
+    WT.selectedAnimals = {} -- reset table for next world right click
+
+    -- populate vehicle entries from the selected vehicles
+    for i = 1, #WT.selectedVehicles do
+        local vehicle = WT.selectedVehicles[i]
         local fullType, wikiElement = WT.createVehicleEntry(vehicle)
         uniqueEntries[fullType] = wikiElement
     end
-    WT.currentVehicles = {} -- reset table for next world right click
+    WT.selectedVehicles = {} -- reset table for next world right click
 
     WT.populateDictionary(context, uniqueEntries)
 end
