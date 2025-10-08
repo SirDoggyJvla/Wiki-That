@@ -3,6 +3,7 @@
 ---@field type string
 ---@field class string
 ---@field _hideIfNoPage boolean
+---@field _url URL
 ---@field page string|nil
 ---@field name string|nil
 ---@field icon Texture|nil
@@ -15,6 +16,7 @@ WikiElement.cacheNameFetch = {}
 
 ---CACHE
 local WT_utility = require "WT_utility"
+local WT_options = require "WT_modOptions"
 -- data
 local itemDictionary = require "data/WT_items"
 local fluidDictionary = require "data/WT_fluids"
@@ -208,6 +210,34 @@ end
 
 
 
+function WikiElement:pauseGame()
+    if WT_options.Pause:getValue() then
+        -- pause game if not already paused
+        local SC = UIManager.getSpeedControls()
+        if SC and not SC:isPaused() then
+            SC:Pause()
+        end
+    end
+end
+
+function WikiElement:openWikiPage()
+    -- nothing to open, another check already disables the option so this is a simple safeguard
+    local page = self:getWikiPage()
+    if not page then return end
+
+    self:pauseGame() -- pause the game
+
+    -- open the wiki page
+    local url = string.format(self._url, page)
+    if isSteamOverlayEnabled() and not WT_options.Browser:getValue() then
+        activateSteamOverlayToWebPage(url) -- steam overlay
+    else
+        openUrl(url) -- browser
+    end
+end
+
+
+
 ---Fetched informations previously cached about this object.
 function WikiElement:fetchCache()
     local object = self.object
@@ -220,7 +250,7 @@ end
 ---@param type string
 ---@param class string
 ---@param _hideIfNoPage boolean|nil -- if true, don't create the element if no wiki page is found
----@return WikiElement|nil instance
+---@return WikiElement instance
 function WikiElement:new(object, type, class, _hideIfNoPage)
     local o = {}
     setmetatable(o, self)
@@ -231,9 +261,7 @@ function WikiElement:new(object, type, class, _hideIfNoPage)
     o.class = class
     o._hideIfNoPage = _hideIfNoPage or false
 
-    -- if _hideIfNoPage then
-    --     o:getWikiPage() -- force fetch of the wiki page for the checks
-    -- end
+    o._url = "https://pzwiki.net/wiki/%s"
 
     -- retrieve informations already previously cached about this object
     o:fetchCache()

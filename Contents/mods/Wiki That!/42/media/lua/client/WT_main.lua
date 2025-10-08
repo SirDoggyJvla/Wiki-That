@@ -41,7 +41,7 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 
     local uniqueItems = {}
 
-	for i = 1,#items do
+	for i = 1,#items do repeat -- repeat to have break act as a continue
 		-- retrieve a unique item, no need to check the ones of the same type
 		local item = items[i]
 		if not instanceof(item, "InventoryItem") then
@@ -53,18 +53,25 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
         if media then
             local rm_guid = media:getId()
             uniqueItems["Media."..rm_guid] = WikiElement:new(item, rm_guid, "Media")
+            break
 
         -- check if item is a moveable item aka tile in InventoryItem form
         elseif instanceof(item, "Moveable") then
             local spriteID = "Moveables."..item:getWorldSprite()
-            uniqueItems[spriteID] = WikiElement:new(item, spriteID, "Moveable")
+            local wikiElement = WikiElement:new(item, spriteID, "Moveable")
+
+            -- this check needs to be done for items that are Moveables but are considered as items such as radio items
+            local wikiPage = wikiElement:getWikiPage()
+            if wikiPage then
+                uniqueItems[wikiElement:getWikiPage()] = wikiElement -- using the wiki page as key to avoid duplicate tiles
+                break
+            end
+        end
 
         -- handle classic item case
-        else
-            local fullType = item:getFullType()
-            uniqueItems["InventoryItem."..fullType] = WikiElement:new(item, fullType, "InventoryItem")
-        end
-    end
+        local fullType = item:getFullType()
+        uniqueItems["InventoryItem."..fullType] = WikiElement:new(item, fullType, "InventoryItem")
+    until true end
 
     local uniqueEntries = WT.fetchFluidEntries(uniqueItems)
     WT.populateDictionary(context, uniqueEntries)
@@ -81,6 +88,9 @@ WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
     end
 end
 
+---Handle context menu for foraging search icons.
+---@param context ISContextMenu
+---@param icon ISBaseIcon
 WT.onFillSearchIconContextMenu = function(context, icon)
     ---@TODO: are these checks needed ? Was from my hunting mod
     -- verify it's valid
@@ -121,16 +131,26 @@ WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, tes
     local uniqueEntries = {}
     for object, _ in pairs(objects) do repeat
         -- get object info
-        local spriteID = object:getSprite():getName()
-        local cropID = cropDictionary.__sprites__[spriteID]
+        local sprite = object:getSprite()
+        if not sprite then break end
+        local spriteID = sprite:getName()
+        local cropID = cropDictionary.__sprites__[spriteID] -- check the sprite is for a crop
 
         -- crop or simple tile
         if cropID then
             uniqueEntries[cropID] = WikiElement:new(object, cropID, "Crop")
-        else
-            ---@TODO: switch _hideIfNoPage to true here
-            uniqueEntries[spriteID] = WikiElement:new(object, spriteID, "Tile", true)
+
+        -- check placed radios and TVs
+        elseif instanceof(object, "IsoWaveSignal") then
+            local fullType, item = WT_utility.getWorldItem(object)
+            if not fullType then break end -- type nil = item nil
+            ---@cast item Item
+            uniqueEntries["InventoryItem."..fullType] = WikiElement:new(item, fullType, "Item")
         end
+
+        -- normal tile
+        local wikiElement = WikiElement:new(object, spriteID, "Tile", true)
+        uniqueEntries[spriteID] = wikiElement
     until true end
 
     -- populate animal entries from the selected animals
@@ -235,7 +255,7 @@ WT.createOptionEntry = function(context, wikiElement, _isMain)
 
     -- create option
     local optionName = _isMain and getText("IGUI_WikiThat") or displayName or wikiElement.type
-    local option = context:addOption(optionName, context, WT_utility.openWikiPage, wikiElement) --[[@as table]]
+    local option = context:addOption(optionName, wikiElement, WikiElement.openWikiPage) --[[@as table]]
 
     -- special case for fluids to show a fluid icon with the fluid color
     if wikiElement.class == "Fluid" then

@@ -76,6 +76,24 @@ WT_utility.getFluidsInFluidContainer = function(fluidContainer)
     return fluidLog
 end
 
+---Retrieve the world item from a given object.
+---@param object IsoObject
+---@return string|nil fullType
+---@return Item|nil
+WT_utility.getWorldItem = function(object)
+    -- access item properties and get the item fullType
+    local containerProperties = object:getProperties()
+    if not containerProperties then return end
+    local fullType = containerProperties:Val("CustomItem")
+    if not fullType then return end
+
+    -- get the item script
+    local item = getItem(fullType)
+    if not item then return end
+
+    return fullType, item
+end
+
 -- WT_utility.getVehiclesOnCursor = function()
 
 
