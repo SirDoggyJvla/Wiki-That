@@ -1,0 +1,8 @@
+IGUI_ES = {
+    IGUI_WikiThat = "Wiki That!",
+    IGUI_WikiThat_Tooltip = "Abre la página de la wiki de:<BR><BR>%s",
+    IGUI_WikiThat_NoPage = "No se encuentra página en la wiki para %s.",
+    IGUI_WikiThat_NoPage_noName = "No se encuentra página en la wiki.",
+
+    IGUI_WikiThat_ModOptions_Pause = "Pausa el juego al abrir la wiki",
+}
