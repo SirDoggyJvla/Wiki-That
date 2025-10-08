@@ -3,4 +3,7 @@ IGUI_PL = {
     IGUI_WikiThat_Tooltip = "Otwórz stronę wiki dla:<BR><BR>%s",
     IGUI_WikiThat_NoPage = "Nie znaleziono strony wiki dla %s.",
     IGUI_WikiThat_NoPage_noName = "Nie znaleziono strony wiki.",
+
+    IGUI_WikiThat_ModOptions_Pause = "Spauzuj grę podczas otwierania strony wiki.",
+    IGUI_WikiThat_ModOptions_Browser = "Użyj zewnętrznej przeglądarki",
 }
