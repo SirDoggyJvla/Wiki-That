@@ -5,4 +5,5 @@ IGUI_ES = {
     IGUI_WikiThat_NoPage_noName = "No se encuentra página en la wiki.",
 
     IGUI_WikiThat_ModOptions_Pause = "Pausa el juego al abrir la wiki",
+    IGUI_WikiThat_ModOptions_Browser = "Usar el navegador externo",
 }
