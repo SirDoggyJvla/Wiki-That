@@ -2,8 +2,8 @@ local patch = {CharacterCreationProfession = {}}
 
 ---CACHE
 local WT = require "WT_module"
-local WikiElement = require "Objects/WikiElement"
 require "WT_main"
+local WETrait = require "Objects/WikiElements/WETrait"
 
 ---Hook into the profession creation screen to add right click context menu to traits
 patch.CharacterCreationProfession.original_create = CharacterCreationProfession.create
@@ -37,7 +37,7 @@ patch.onRightClickTrait = function(self, x, y)
         -- populate context menu for wiki that
         local trait = self.items[self.selected].item --[[@as Trait]]
         local type = trait:getType()
-        local uniqueEntries = {[type] = WikiElement:new(trait, type, "Trait"),}
+        local uniqueEntries = {[type] = WETrait:new(trait, type, "Trait"),}
         WT.populateDictionary(context, uniqueEntries)
     end
 end
@@ -54,7 +54,7 @@ patch.onRightClickProfession = function(self, x, y)
         -- populate context menu for wiki that
         local profession = self.items[self.selected].item --[[@as Profession]]
         local type = profession:getType()
-        local uniqueEntries = {[type] = WikiElement:new(profession, type, "Profession"),}
+        local uniqueEntries = {[type] = WETrait:new(profession, type, "Profession"),}
         WT.populateDictionary(context, uniqueEntries)
     end
 end

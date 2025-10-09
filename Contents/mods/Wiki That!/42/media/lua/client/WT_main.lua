@@ -1,9 +1,17 @@
 ---CACHE
 local WT = require "WT_module"
 local WT_utility = require "WT_utility"
-local WT_pages = require "WT_pages"
-local WikiElement = require "Objects/WikiElement"
 local cropDictionary = require "data/WT_crops"
+-- wiki elements
+local WikiElement = require "Objects/WikiElement"
+local WEInventoryItem = require "Objects/WikiElements/WEInventoryItem"
+local WEItem = require "Objects/WikiElements/WEItem"
+local WEFluid = require "Objects/WikiElements/WEFluid"
+local WEBaseVehicle = require "Objects/WikiElements/WEBaseVehicle"
+local WEIsoAnimal = require "Objects/WikiElements/WEIsoAnimal"
+local WEForageCategory = require "Objects/WikiElements/WEForageCategory"
+local WETile = require "Objects/WikiElements/WETile"
+local WECrop = require "Objects/WikiElements/WECrop"
 -- reset pool
 WT.tooltipPool = {}
 WT.tooltipsUsed = {}
@@ -52,13 +60,13 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
         local media = item:getMediaData()
         if media then
             local rm_guid = media:getId()
-            uniqueItems["Media."..rm_guid] = WikiElement:new(item, rm_guid, "Media")
+            uniqueItems["Media."..rm_guid] = WEInventoryItem:new(item, rm_guid, "Media")
             break
 
         -- check if item is a moveable item aka tile in InventoryItem form
         elseif instanceof(item, "Moveable") then
             local spriteID = "Moveables."..item:getWorldSprite()
-            local wikiElement = WikiElement:new(item, spriteID, "Moveable")
+            local wikiElement = WEInventoryItem:new(item, spriteID, "Moveable")
 
             -- this check needs to be done for items that are Moveables but are considered as items such as radio items
             local wikiPage = wikiElement:getWikiPage()
@@ -70,7 +78,7 @@ WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
 
         -- handle classic item case
         local fullType = item:getFullType()
-        uniqueItems["InventoryItem."..fullType] = WikiElement:new(item, fullType, "InventoryItem")
+        uniqueItems["InventoryItem."..fullType] = WEInventoryItem:new(item, fullType, "InventoryItem")
     until true end
 
     local uniqueEntries = WT.fetchFluidEntries(uniqueItems)
@@ -107,8 +115,8 @@ WT.onFillSearchIconContextMenu = function(context, icon)
     local catDef = icon.catDef
 
     local uniqueEntries = {
-        ["ForageCategory."..catDef.name] = WikiElement:new(catDef,catDef.name,"ForageCategory"),
-        ["Item."..itemType] = WikiElement:new(item, itemType, "Item"),
+        ["ForageCategory."..catDef.name] = WEForageCategory:new(catDef,catDef.name,"ForageCategory"),
+        ["Item."..itemType] = WEItem:new(item, itemType, "Item"),
     }
     WT.populateDictionary(context, uniqueEntries)
 end
@@ -130,6 +138,19 @@ WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, tes
     -- retrieve wiki elements from world objects
     local uniqueEntries = {}
     for object, _ in pairs(objects) do repeat
+        -- -- check animal zone
+        -- local animalZone = DesignationZoneAnimal.getZone(object:getSquare():getX(), object:getSquare():getY(), object:getSquare():getZ())
+        -- if animalZone then
+        --     print(animalZone)
+        --     local animals = animalZone:getAnimals()
+        --     for i = 0, animals:size()-1 do
+        --         local animal = animals:get(i)
+        --         table.insert(WT.selectedAnimals, animal) -- store for use in the world object context menu
+        --         print(animal)
+        --     end
+
+        -- end
+
         -- get object info
         local sprite = object:getSprite()
         if not sprite then break end
@@ -138,18 +159,20 @@ WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, tes
 
         -- crop or simple tile
         if cropID then
-            uniqueEntries[cropID] = WikiElement:new(object, cropID, "Crop")
+            uniqueEntries[cropID] = WECrop:new(object, cropID, "Crop")
+            break
 
         -- check placed radios and TVs
         elseif instanceof(object, "IsoWaveSignal") then
             local fullType, item = WT_utility.getWorldItem(object)
             if not fullType then break end -- type nil = item nil
             ---@cast item Item
-            uniqueEntries["InventoryItem."..fullType] = WikiElement:new(item, fullType, "Item")
+            uniqueEntries["Item."..fullType] = WEItem:new(item, fullType, "Item")
+            break
         end
 
         -- normal tile
-        local wikiElement = WikiElement:new(object, spriteID, "Tile", true)
+        local wikiElement = WETile:new(object, spriteID, "Tile", true)
         uniqueEntries[spriteID] = wikiElement
     until true end
 
@@ -174,12 +197,12 @@ end
 
 WT.createAnimalEntry = function(animal)
     local fullType = animal:getAnimalType() .. animal:getBreed():getName()
-    return fullType, WikiElement:new(animal, fullType, "IsoAnimal")
+    return fullType, WEIsoAnimal:new(animal, fullType, "IsoAnimal")
 end
 
 WT.createVehicleEntry = function(vehicle)
     local fullType = vehicle:getScript():getFullType()
-    return "BaseVehicle."..fullType, WikiElement:new(vehicle, fullType, "BaseVehicle")
+    return "BaseVehicle."..fullType, WEBaseVehicle:new(vehicle, fullType, "BaseVehicle")
 end
 
 ---Fetch fluid entries from the given dictionary of unique entries and add them to the same dictionary.
@@ -198,7 +221,7 @@ WT.fetchFluidEntries = function(uniqueEntries)
         local fluidLog = WT_utility.getFluidsInFluidContainer(fluidContainer)
         for fluidType, fluid in pairs(fluidLog) do
             fluidType = "Base." .. fluidType
-            uniqueEntries["Fluid."..fluidType] = WikiElement:new(fluid, fluidType, "Fluid")
+            uniqueEntries["Fluid."..fluidType] = WEFluid:new(fluid, fluidType, "Fluid")
         end
     until true end
     return uniqueEntries
@@ -255,7 +278,7 @@ WT.createOptionEntry = function(context, wikiElement, _isMain)
 
     -- create option
     local optionName = _isMain and getText("IGUI_WikiThat") or displayName or wikiElement.type
-    local option = context:addOption(optionName, wikiElement, WikiElement.openWikiPage) --[[@as table]]
+    local option = context:addOption(optionName, wikiElement, wikiElement.openWikiPage) --[[@as table]]
 
     -- special case for fluids to show a fluid icon with the fluid color
     if wikiElement.class == "Fluid" then
