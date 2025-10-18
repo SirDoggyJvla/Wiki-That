@@ -1,5 +1,0 @@
---[[
-
-Removed implementation
-
-]]--

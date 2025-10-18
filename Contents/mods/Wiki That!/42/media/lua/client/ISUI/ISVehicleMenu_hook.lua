@@ -1,2 +1,0 @@
----@RENAMED to ISVehicleMenu_patch.lua
----kept to handle Steam not removing files in active users installations
