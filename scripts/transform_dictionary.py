@@ -146,7 +146,7 @@ def _dict_to_lua_table(d, file_path, descriptor=None, E=None):
 
 
 if __name__ == "__main__":
-    path_to_lua = "Contents/mods/Wiki That!/common/media/lua/shared/data"
+    path_to_lua = "Contents/mods/Wiki That!/common/media/lua/shared/WikiThat!/data"
 
     """
         category: the top-level key in the JSON (e.g., "item", "vehicle", etc.)
