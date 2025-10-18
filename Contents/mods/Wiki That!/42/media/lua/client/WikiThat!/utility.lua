@@ -6,7 +6,7 @@ Utility functions
 local WT_utility = {}
 
 ---CACHE
-local WT_options = require "WikiThat!/WT_modOptions"
+local WT_options = require "WikiThat!/modOptions"
 local WikiElement = require "WikiThat!/Objects/WikiElement"
 
 ---Utility to count entries in a dictionary (key-table).

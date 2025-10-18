@@ -1,5 +1,5 @@
-local WT = require "WikiThat!/WT_module"
-require "WikiThat!/WT_main"
+local WT = require "WikiThat!/module"
+require "WikiThat!/main"
 
 Events.OnFillInventoryObjectContextMenu.Add(WT.OnFillInventoryObjectContextMenu)
 Events.OnFillWorldObjectContextMenu.Add(WT.OnFillWorldObjectContextMenu)

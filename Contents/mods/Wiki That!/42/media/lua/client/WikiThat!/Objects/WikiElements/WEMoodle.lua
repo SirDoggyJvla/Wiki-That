@@ -5,7 +5,7 @@ WikiElement for Moodles
 ]]
 
 local WikiElement = require "WikiThat!/Objects/WikiElement"
-local WT_utility = require "WikiThat!/WT_utility"
+local WT_utility = require "WikiThat!/utility"
 
 ---@class WEMoodle : WikiElement
 ---@field object Moodles

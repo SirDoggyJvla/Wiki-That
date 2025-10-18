@@ -1,7 +1,7 @@
 ---CACHE
-local WT = require "WikiThat!/WT_module"
-local WT_utility = require "WikiThat!/WT_utility"
-local cropDictionary = require "WikiThat!/data/WT_crops"
+local WT = require "WikiThat!/module"
+local WT_utility = require "WikiThat!/utility"
+local cropDictionary = require "WikiThat!/data/crops"
 -- wiki elements
 local WikiElement = require "WikiThat!/Objects/WikiElement"
 local WEInventoryItem = require "WikiThat!/Objects/WikiElements/WEInventoryItem"

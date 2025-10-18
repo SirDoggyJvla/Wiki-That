@@ -1,5 +1,5 @@
 ---CACHE
-local cropDictionary = require "WikiThat!/data/WT_crops"
+local cropDictionary = require "WikiThat!/data/crops"
 -- cropDictionary.__sprites__ = {}
 
 local WT_parseCrops = {}

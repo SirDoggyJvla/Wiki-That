@@ -1,8 +1,8 @@
 local patch = {CharacterCreationProfession = {}}
 
 ---CACHE
-local WT = require "WikiThat!/WT_module"
-require "WikiThat!/WT_main"
+local WT = require "WikiThat!/module"
+require "WikiThat!/main"
 local WETrait = require "WikiThat!/Objects/WikiElements/WETrait"
 
 ---Hook into the profession creation screen to add right click context menu to traits

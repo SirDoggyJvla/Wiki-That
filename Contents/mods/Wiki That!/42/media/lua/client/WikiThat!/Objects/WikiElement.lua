@@ -14,20 +14,20 @@
 local WikiElement = ISBaseObject:derive("WikiElement")
 
 ---CACHE
-local WT_options = require "WikiThat!/WT_modOptions"
+local WT_options = require "WikiThat!/modOptions"
 -- data
-local itemDictionary = require "WikiThat!/data/WT_items"
-local fluidDictionary = require "WikiThat!/data/WT_fluids"
-local vehicleDictionary = require "WikiThat!/data/WT_vehicles"
-local moveableDictionary = require "WikiThat!/data/WT_moveables"
-local tileDictionary = require "WikiThat!/data/WT_tiles"
-local mediaDictionary = require "WikiThat!/data/WT_media"
-local traitDictionary = require "WikiThat!/data/WT_traits"
-local professionDictionary = require "WikiThat!/data/WT_professions"
-local forageDictionary = require "WikiThat!/data/WT_forage"
-local animalDictionary = require "WikiThat!/data/WT_animals"
-local cropDictionary = require "WikiThat!/data/WT_crops"
-local moodleDictionary = require "WikiThat!/data/WT_moodles"
+local itemDictionary = require "WikiThat!/data/items"
+local fluidDictionary = require "WikiThat!/data/fluids"
+local vehicleDictionary = require "WikiThat!/data/vehicles"
+local moveableDictionary = require "WikiThat!/data/moveables"
+local tileDictionary = require "WikiThat!/data/tiles"
+local mediaDictionary = require "WikiThat!/data/media"
+local traitDictionary = require "WikiThat!/data/traits"
+local professionDictionary = require "WikiThat!/data/professions"
+local forageDictionary = require "WikiThat!/data/forage"
+local animalDictionary = require "WikiThat!/data/animals"
+local cropDictionary = require "WikiThat!/data/crops"
+local moodleDictionary = require "WikiThat!/data/moodles"
 
 ---Class mapping to their dictionary.
 WikiElement.wikiPages = {

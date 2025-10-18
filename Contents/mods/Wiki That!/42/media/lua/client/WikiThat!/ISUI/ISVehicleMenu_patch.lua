@@ -1,4 +1,4 @@
-local WT = require "WikiThat!/WT_module"
+local WT = require "WikiThat!/module"
 local WikiElement = require "WikiThat!/Objects/WikiElement"
 
 require "ISUI/ISVehicleMenu"
