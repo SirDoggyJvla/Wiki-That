@@ -12,6 +12,7 @@ local WEIsoAnimal = require "Objects/WikiElements/WEIsoAnimal"
 local WEForageCategory = require "Objects/WikiElements/WEForageCategory"
 local WETile = require "Objects/WikiElements/WETile"
 local WECrop = require "Objects/WikiElements/WECrop"
+local WEMoodle = require "Objects/WikiElements/WEMoodle"
 -- reset pool
 WT.tooltipPool = {}
 WT.tooltipsUsed = {}
@@ -28,12 +29,6 @@ local function printTable(tbl, maxLvl, _lvl)
             printTable(v, maxLvl, _lvl + 1)
         end
     end
-end
-
-WT.OnInitGlobalModData = function(newGame)
-    -- init cache
-    WT.cachePageFetch = {}
-    WT.cacheNameFetch = {}
 end
 
 ---Handle Wiki That for inventory items. Detect the type of item if media, moveable or classic item. Also check if the item entries have fluid containers, and if so add the fluids to the elements too.
@@ -122,9 +117,9 @@ WT.onFillSearchIconContextMenu = function(context, icon)
 end
 
 ---Handle context menu for world objects. Detect if the object is a crop or a tile.
----Also uses the selected vehicles and animals from the previous context menu events to add them too.
 ---
----The events used are `OnClickedAnimalForContext` and a hook to `ISVehicleMenu.FillMenuOutsideVehicle`.
+---Also uses the selected vehicles and animals from the previous context menu events to add them too.
+---The events used are `OnClickedAnimalForContext` and a hook to `ISVehicleMenu.FillMenuOutsideVehicle` which trigger before, to store the relevant other objects.
 ---@param playerNum any
 ---@param context any
 ---@param worldObjects any
@@ -135,22 +130,36 @@ WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, tes
         objects[worldObjects[i]] = true
     end
 
-    -- retrieve wiki elements from world objects
+    -- find unique wiki elements from world objects and other elements
     local uniqueEntries = {}
+
+    -- retrieve the right clicked moodle if one is hovered
+    local moodlesUI = MoodlesUI.getInstance()
+    if WT_utility.getJavaField(moodlesUI, "mouseOver") then
+        local mouseOverSlot = WT_utility.getJavaField(moodlesUI, "mouseOverSlot") --[[@as number]]
+        local moodleSlotsPos = WT_utility.getJavaField(moodlesUI, "moodleSlotsPos") --[[@as table]]
+        local player = getSpecificPlayer(playerNum)
+        local moodles = player:getMoodles()
+
+        -- verify that a moodle is being hovered, meaning it was right clicked
+        local uiPos = 0 -- int2 in decompile for MoodlesUI.render
+        for int3 = 0, MoodleType.ToIndex(MoodleType.MAX) - 1 do
+            -- check if the moodle is currently visibile
+            if moodleSlotsPos[int3] and moodleSlotsPos[int3] ~= 10000 then
+                -- check if this is the moodle being hovered
+                if uiPos == mouseOverSlot then
+                    local moodleIndex = int3 - 1
+                    local moodleType = MoodleType.FromIndex(moodleIndex):toString()
+                    local wikiElement = WEMoodle:new(moodles, moodleType, "Moodle")
+                    uniqueEntries["Moodle."..moodleType] = wikiElement
+                end
+                uiPos = uiPos + 1
+            end
+        end
+    end
+
+    -- retrieve wiki elements from world objects
     for object, _ in pairs(objects) do repeat
-        -- -- check animal zone
-        -- local animalZone = DesignationZoneAnimal.getZone(object:getSquare():getX(), object:getSquare():getY(), object:getSquare():getZ())
-        -- if animalZone then
-        --     print(animalZone)
-        --     local animals = animalZone:getAnimals()
-        --     for i = 0, animals:size()-1 do
-        --         local animal = animals:get(i)
-        --         table.insert(WT.selectedAnimals, animal) -- store for use in the world object context menu
-        --         print(animal)
-        --     end
-
-        -- end
-
         -- get object info
         local sprite = object:getSprite()
         if not sprite then break end

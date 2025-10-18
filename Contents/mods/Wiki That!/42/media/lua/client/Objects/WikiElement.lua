@@ -10,12 +10,8 @@
 ---@field page string|nil
 ---@field name string|nil
 ---@field icon Texture|nil
----@field cachePageFetch table<Wikable, string>
----@field cacheNameFetch table<Wikable, string>
 ---@field wikiPages table<string, table<string, string>>
 local WikiElement = ISBaseObject:derive("WikiElement")
-WikiElement.cachePageFetch = {}
-WikiElement.cacheNameFetch = {}
 
 ---CACHE
 local WT_options = require "WT_modOptions"
@@ -31,6 +27,7 @@ local professionDictionary = require "data/WT_professions"
 local forageDictionary = require "data/WT_forage"
 local animalDictionary = require "data/WT_animals"
 local cropDictionary = require "data/WT_crops"
+local moodleDictionary = require "data/WT_moodles"
 
 ---Class mapping to their dictionary.
 WikiElement.wikiPages = {
@@ -46,6 +43,7 @@ WikiElement.wikiPages = {
     ["ForageCategory"] = forageDictionary,
     ["IsoAnimal"] = animalDictionary,
     ["Crop"] = cropDictionary,
+    ["Moodle"] = moodleDictionary,
 }
 
 
@@ -66,7 +64,6 @@ function WikiElement:getWikiPage()
 
     -- cache
     self.page = page
-    WikiElement.cachePageFetch[self.object] = page
     return page
 end
 
@@ -206,20 +203,13 @@ end
 
 ---[[ CONSTRUCTOR ]]
 
----Fetched informations previously cached about this object.
-function WikiElement:fetchCache()
-    local object = self.object
-    self.page = WikiElement.cachePageFetch[object]
-    self.name = WikiElement.cacheNameFetch[object]
-end
-
 ---Create a WikiElement instance.
 ---@param object Wikable
 ---@param type string
 ---@param class string
 ---@param _hideIfNoPage boolean|nil -- if true, don't create the element if no wiki page is found
 ---@return WikiElement instance
-function WikiElement:new(object, type, class, _hideIfNoPage)
+function WikiElement:new(object, type, class, _hideIfNoPage, ...)
     local o = {}
     setmetatable(o, self)
     self.__index = self
@@ -228,11 +218,9 @@ function WikiElement:new(object, type, class, _hideIfNoPage)
     o.type = type
     o.class = class
     o._hideIfNoPage = _hideIfNoPage or false
+    o._extraData = {...}
 
     o._url = "https://pzwiki.net/wiki/%s"
-
-    -- retrieve informations already previously cached about this object
-    o:fetchCache()
 
     return o
 end

@@ -3053,6 +3053,7 @@ return {
     ["location_entertainment_gallery_01_33"] = "Waterfall Painting",
     ["trash_walls_01_0"] = "Weathered Notices",
     ["trash_walls_01_1"] = "Weathered Notices",
+    ["camping_01_16"] = "Well",
     ["street_roadsigns_01_36"] = "West Point Road Sign",
     ["street_roadsigns_01_37"] = "West Point Road Sign",
     ["recreational_01_8"] = "Western Piano",

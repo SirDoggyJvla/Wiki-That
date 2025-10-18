@@ -49,7 +49,7 @@ patch.onRightClickProfession = function(self, x, y)
     if self.selected then
         -- init context menu
         local context = patch.traitContextMenu
-        context = patch.resetContextMenu(context,getMouseX(), getMouseY())
+        context = patch.resetContextMenu(context, getMouseX(), getMouseY())
 
         -- populate context menu for wiki that
         local profession = self.items[self.selected].item --[[@as Profession]]

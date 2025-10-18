@@ -66,5 +66,11 @@
         "id": "category_id",
         "file": "WT_forage.lua",
         "descriptor": "Foraging category dictionary"
+    },
+    {
+        "category": "moodle",
+        "id": "moodle_id",
+        "file": "WT_moodles.lua",
+        "descriptor": "Moodle dictionary"
     }
 ]

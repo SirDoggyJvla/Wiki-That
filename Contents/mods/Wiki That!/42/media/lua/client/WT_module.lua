@@ -9,9 +9,6 @@ local WT = {
     backgroundColor_darker = {r=0.24, g=0.04, b=0.05, a=1},
     backgroundColor_darkest = {r=0.20, g=0.05, b=0.05, a=0.5},
 
-    cachePageFetch = {},
-    cacheNameFetch = {},
-
     selectedVehicles = {},
     selectedAnimals = {},
 }

@@ -48,6 +48,18 @@ WT_utility.split = function(inputstr, sep)
 end
 
 
+WT_utility.getJavaField = function(object, field)  -- (IsoZombie instance, "strength")
+    local offset = string.len(field)
+    for i = 0, getNumClassFields(object) - 1 do
+        local m = getClassField(object, i)
+        if string.sub(tostring(m), -offset) == field then
+            return getClassFieldVal(object, m)
+        end
+    end
+    return nil -- no field found
+end
+
+
 ---Retrieve the option icon for a given entry.
 ---@param wikiElement WikiElement|nil
 ---@param _isMain boolean|nil -- if true, this is the parent option "Wiki That!"
@@ -94,7 +106,6 @@ WT_utility.getWorldItem = function(object)
     return fullType, item
 end
 
--- WT_utility.getVehiclesOnCursor = function()
 
 
 
