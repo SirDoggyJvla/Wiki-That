@@ -2,75 +2,75 @@
     {
         "category": "item",
         "id": "item_id",
-        "file": "WT_items.lua",
+        "file": "items.lua",
         "descriptor": "Item dictionary"
     },
     {
         "category": "fluid",
         "id": "fluid_id",
-        "file": "WT_fluids.lua",
+        "file": "fluids.lua",
         "descriptor": "Fluid dictionary"
     },
     {
         "category": "vehicle",
         "id": "vehicle_id",
-        "file": "WT_vehicles.lua",
+        "file": "vehicles.lua",
         "descriptor": "Vehicle dictionary"
     },
     {
         "category": "tile",
         "id": "item_id",
         "second_id": "sprite_id",
-        "file": "WT_moveables.lua",
+        "file": "moveables.lua",
         "descriptor": "Moveable dictionary"
     },
     {
         "category": "tile",
         "id": "sprite_id",
-        "file": "WT_tiles.lua",
+        "file": "tiles.lua",
         "descriptor": "Tile dictionary"
     },
     {
         "category": "tile",
         "id": "crop_id",
-        "file": "WT_crops.lua",
+        "file": "crops.lua",
         "descriptor": "Crop dictionary",
         "phantom_table": "__sprites__"
     },
     {
         "category": "item",
         "id": "rm_guid",
-        "file": "WT_media.lua",
+        "file": "media.lua",
         "descriptor": "Media dictionary"
     },
     {
         "category": "trait",
         "id": "trait_id",
-        "file": "WT_traits.lua",
+        "file": "traits.lua",
         "descriptor": "Trait dictionary"
     },
     {
         "category": "occupation",
         "id": "occupation_id",
-        "file": "WT_professions.lua",
+        "file": "professions.lua",
         "descriptor": "Profession/Occupation dictionary"
     },
     {
         "category": "animal",
         "id": "full_breed_id",
-        "file": "WT_animals.lua",
+        "file": "animals.lua",
         "descriptor": "Animal dictionary"
     },
     {
         "category": "foraging_category",
         "id": "category_id",
-        "file": "WT_forage.lua",
+        "file": "forage.lua",
         "descriptor": "Foraging category dictionary"
     },
     {
         "category": "moodle",
         "id": "moodle_id",
-        "file": "WT_moodles.lua",
+        "file": "moodles.lua",
         "descriptor": "Moodle dictionary"
     }
 ]
