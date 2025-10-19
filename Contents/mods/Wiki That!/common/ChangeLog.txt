@@ -58,3 +58,20 @@ Fixed:
 - Radios and TVs not being wikable (item and tile).
 
 [ ------ ]
+
+[ 10/19/25 ]
+1.5.0
+Added:
+- Moodles support: right click a moodle on the HUD to open a context menu to access wiki pages of moodles
+- Ability to right click traits in the in-game character menu
+
+Updated:
+- Pages dictionary (page indexes, new pages, moved pages etc.)
+- Complete reorganization of the files. This means old files will still be present in your installation, but I support it by making those old files empty. In the future, I will remove those old files completely, going with the supposition that everyone updated to the new version. Preferably, do a fresh install of the mod.
+- Improved context menu system to use a custom context menu class, should make it easier to render fresh custom context menus
+
+Fixed:
+- Tile and crop text in the Wiki That tooltip
+- Removed cache system for WikiElement as it was causing issues and was not really needed
+
+[ ------ ]
