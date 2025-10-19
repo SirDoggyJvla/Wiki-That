@@ -7,7 +7,6 @@ local WT_utility = {}
 
 ---CACHE
 local WT_options = require "WikiThat!/modOptions"
-local WikiElement = require "WikiThat!/Objects/WikiElement"
 
 ---Utility to count entries in a dictionary (key-table).
 ---@param dict table
@@ -108,35 +107,39 @@ end
 
 
 
-
----Converts a page name to its wiki URL.
----@param pageName PageName
----@return URL
-WT_utility.pageNameToUrl = function(pageName)
-    return "https://pzwiki.net/wiki/" .. pageName
-end
-
---- Opens the wiki page for a given page name. Checks if the Steam overlay is
---- activated and used that or use the default browser.
----@param context ISContextMenu
----@param wikiElement WikiElement
-WT_utility.openWikiPage = function(context, wikiElement)
-    local pageName = wikiElement:getWikiPage()
-    if not pageName then return end
-    -- pause the game
-    if WT_options.Pause:getValue() then
-        local SC = UIManager.getSpeedControls()
-        if SC and not SC:isPaused() then
-            SC:Pause()
+local SLIDEY = 10
+WT_utility.resetContextMenu = function(context,x,y)
+    local player = 0
+    context:hideAndChildren()
+    context:setVisible(true)
+    context:clear()
+    context:setFontFromOption()
+	context.forceVisible = true
+    context.parent = nil
+    context.requestX = x
+    context.requestY = y
+    context:setSlideGoalX(x + 20, x)
+    context:setSlideGoalY(y - SLIDEY, y)
+    context:bringToTop()
+    context:setVisible(true)
+    context.visibleCheck = true
+    if context.instanceMap then
+        for _,v in pairs(context.instanceMap) do
+            v:setVisible(false)
+            v:removeFromUIManager()
+            table.insert(context.subMenuPool, v)
         end
+        table.wipe(context.instanceMap)
     end
-
-    local url = WT_utility.pageNameToUrl(pageName)
-    if isSteamOverlayEnabled() then
-        activateSteamOverlayToWebPage(url)
-    else
-        openUrl(url)
-    end
+    context.instanceMap = context.instanceMap or {}
+    context.subMenuPool = context.subMenuPool or {}
+    context.subOptionNums = 0
+    context.subInstance = nil
+    context.subMenu = nil
+	context.player = player
+	context:setForceCursorVisible(false)
+	return context
 end
+
 
 return WT_utility

@@ -134,6 +134,9 @@ WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, tes
     local uniqueEntries = {}
 
     -- retrieve the right clicked moodle if one is hovered
+    ---@TODO: the world object context menu doesn't always open when right clicking a moodle, such as when right clicking
+    ---non-explored areas. Maybe do like for animals and maybe create our own context menu based on the current situation to not have two context menus
+    ---or find a way to properly hide the world object context menu
     local moodlesUI = MoodlesUI.getInstance()
     if WT_utility.getJavaField(moodlesUI, "mouseOver") then
         local mouseOverSlot = WT_utility.getJavaField(moodlesUI, "mouseOverSlot") --[[@as number]]

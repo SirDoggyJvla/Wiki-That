@@ -157,6 +157,12 @@ function WikiElement:getTooltipImage(texture)
     -- fix path of the image
     local texturePath = string.gsub(texture:getName(), "^.*media", "media")
 
+    -- check if texturePath has spaces
+    if string.find(texturePath, " ") then
+        ---@TODO: make a proper custom texture rendered to handle texture drawing directly in the tooltip
+        return "" -- texture cannot show up with spaces in path
+    end
+
     -- find proper texture size for the tooltip
     local ratio = width/height
     height = _setHeight -- fixed height
