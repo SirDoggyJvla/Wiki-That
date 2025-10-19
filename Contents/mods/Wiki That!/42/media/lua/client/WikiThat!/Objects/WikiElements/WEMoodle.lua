@@ -30,7 +30,6 @@ function WEMoodle:_getIcon()
     local moodlesUI = MoodlesUI.getInstance()
     local moodleTextureSet = WT_utility.getJavaField(moodlesUI, "currentTextureSet") --[[@as MoodleTextureSet]]
     local moodleTextures = WT_utility.getJavaField(moodleTextureSet, "MoodleTextures")
-    local moodleType = self:_getMoodleType()
 
     return moodleTextures[MoodleType.ToIndex(self:_getMoodleType()) + 1] -- +1 because Java arrays are 0-based
 end

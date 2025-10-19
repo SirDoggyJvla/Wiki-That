@@ -17,4 +17,15 @@ function WECrop:_getIcon()
     return getTexture("media/textures/"..iconID)
 end
 
+---Default the object name to its wiki page if no other method is implemented.
+---@return string|nil
+function WECrop:_getName()
+    local plant = CFarmingSystem.instance:getLuaObjectOnSquare(self.object:getSquare())
+    if not plant then return self:getWikiPage() end
+
+    local name = getText("Farming_" .. plant.typeOfSeed)
+
+    return name
+end
+
 return WECrop

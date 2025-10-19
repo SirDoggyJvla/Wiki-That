@@ -79,4 +79,19 @@ function ISWikiThatContextMenu:resetContextMenu(x, y)
 	return context
 end
 
+function ISWikiThatContextMenu:adjustX()
+	local screenW = getCore():getScreenWidth()
+	local goLeft
+	if self.x + self.width - 20 > screenW then
+		goLeft = true
+	end
+
+	if not goLeft then return end
+
+	local m_x = getMouseX()
+	local x = m_x - self.width
+
+	self:setSlideGoalX(self.x, x)
+end
+
 return ISWikiThatContextMenu

@@ -1,7 +1,6 @@
 ---CACHE
 local WT = require "WikiThat!/module"
 local WT_utility = require "WikiThat!/utility"
-local cropDictionary = require "WikiThat!/data/crops"
 -- wiki elements
 local WikiElement = require "WikiThat!/Objects/WikiElement"
 local WEInventoryItem = require "WikiThat!/Objects/WikiElements/WEInventoryItem"
@@ -16,6 +15,8 @@ local WEMoodle = require "WikiThat!/Objects/WikiElements/WEMoodle"
 -- reset pool
 WT.tooltipPool = {}
 WT.tooltipsUsed = {}
+-- dictionaries
+local cropDictionary = require "WikiThat!/data/crops"
 
 ---@DEBUG
 local function printTable(tbl, maxLvl, _lvl)
@@ -28,6 +29,63 @@ local function printTable(tbl, maxLvl, _lvl)
         if type(v) == "table" and _lvl < maxLvl then
             printTable(v, maxLvl, _lvl + 1)
         end
+    end
+end
+
+
+---Initialize the ingame context menu for Wiki That.
+WT.OnGameStart = function(_)
+    WT.ingameContextMenu:initialise()
+    WT.ingameContextMenu:addToUIManager()
+    WT.ingameContextMenu:setVisible(false)
+    WT.ingameContextMenu.keepOnScreen = false
+end
+
+---Detect when right clicking a moodle, and mark the context menu for world objects
+---to disable itself, to replace it with our own custom empty context menu.
+---
+---The context menu for world objects is disabled inside ISObjectClickHandler_patch.lua
+---@param x integer
+---@param y integer
+WT.OnRightMouseDown = function(x, y)
+    -- retrieve the right clicked moodle if one is hovered
+    local moodlesUI = MoodlesUI.getInstance()
+    if WT_utility.getJavaField(moodlesUI, "mouseOver") then
+        WT.moodleRightClicked = true
+        local mouseOverSlot = WT_utility.getJavaField(moodlesUI, "mouseOverSlot") --[[@as number]]
+        local moodleSlotsPos = WT_utility.getJavaField(moodlesUI, "moodleSlotsPos") --[[@as table]]
+        local player = getPlayer()
+        local moodles = player:getMoodles()
+
+        -- verify that a moodle is being hovered, meaning it was right clicked
+        local uiPos = 0 -- int2 in decompile for MoodlesUI.render
+        local uniqueEntries = {}
+        local active = false
+        for int3 = 0, MoodleType.ToIndex(MoodleType.MAX) - 1 do
+            -- check if the moodle is currently visibile
+            if moodleSlotsPos[int3] and moodleSlotsPos[int3] ~= 10000 then
+                -- check if this is the moodle being hovered
+                if uiPos == mouseOverSlot then
+                    local moodleIndex = int3 - 1
+                    local moodleType = MoodleType.FromIndex(moodleIndex):toString()
+                    local wikiElement = WEMoodle:new(moodles, moodleType, "Moodle")
+                    uniqueEntries["Moodle."..moodleType] = wikiElement
+                    active = true
+                    break
+                end
+                uiPos = uiPos + 1
+            end
+        end
+
+        if not active then return end
+
+        -- init context menu
+        local context = WT.ingameContextMenu --[[@as ISWikiThatContextMenu]]
+        context = context:resetContextMenu(getMouseX(), getMouseY())
+
+        -- populate context menu for wiki that
+        WT.populateDictionary(context, uniqueEntries)
+        context:adjustX()
     end
 end
 
@@ -120,10 +178,10 @@ end
 ---
 ---Also uses the selected vehicles and animals from the previous context menu events to add them too.
 ---The events used are `OnClickedAnimalForContext` and a hook to `ISVehicleMenu.FillMenuOutsideVehicle` which trigger before, to store the relevant other objects.
----@param playerNum any
----@param context any
----@param worldObjects any
----@param test any
+---@param playerNum integer
+---@param context ISContextMenu
+---@param worldObjects table<IsoObject>
+---@param test boolean
 WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, test)
     local objects = {}
     for i=1, #worldObjects do
@@ -132,34 +190,6 @@ WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, tes
 
     -- find unique wiki elements from world objects and other elements
     local uniqueEntries = {}
-
-    -- retrieve the right clicked moodle if one is hovered
-    ---@TODO: the world object context menu doesn't always open when right clicking a moodle, such as when right clicking
-    ---non-explored areas. Maybe do like for animals and maybe create our own context menu based on the current situation to not have two context menus
-    ---or find a way to properly hide the world object context menu
-    local moodlesUI = MoodlesUI.getInstance()
-    if WT_utility.getJavaField(moodlesUI, "mouseOver") then
-        local mouseOverSlot = WT_utility.getJavaField(moodlesUI, "mouseOverSlot") --[[@as number]]
-        local moodleSlotsPos = WT_utility.getJavaField(moodlesUI, "moodleSlotsPos") --[[@as table]]
-        local player = getSpecificPlayer(playerNum)
-        local moodles = player:getMoodles()
-
-        -- verify that a moodle is being hovered, meaning it was right clicked
-        local uiPos = 0 -- int2 in decompile for MoodlesUI.render
-        for int3 = 0, MoodleType.ToIndex(MoodleType.MAX) - 1 do
-            -- check if the moodle is currently visibile
-            if moodleSlotsPos[int3] and moodleSlotsPos[int3] ~= 10000 then
-                -- check if this is the moodle being hovered
-                if uiPos == mouseOverSlot then
-                    local moodleIndex = int3 - 1
-                    local moodleType = MoodleType.FromIndex(moodleIndex):toString()
-                    local wikiElement = WEMoodle:new(moodles, moodleType, "Moodle")
-                    uniqueEntries["Moodle."..moodleType] = wikiElement
-                end
-                uiPos = uiPos + 1
-            end
-        end
-    end
 
     -- retrieve wiki elements from world objects
     for object, _ in pairs(objects) do repeat

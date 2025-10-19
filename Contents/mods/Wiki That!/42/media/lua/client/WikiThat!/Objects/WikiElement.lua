@@ -80,19 +80,15 @@ function WikiElement:getName()
     local name = self:_getName()
     if not name then return nil end
 
-    -- early return
-    if not name then return nil end
-
     -- cache
     self.name = name
-    -- WikiElement.cacheNameFetch[self.object] = name -- deactivated because some objects are recycled and thus this might break their page access
     return name
 end
 
 ---Default the object name to its wiki page if no other method is implemented.
 ---@return string|nil
 function WikiElement:_getName()
-    return WikiElement:getWikiPage()
+    return self:getWikiPage()
 end
 
 
@@ -157,11 +153,14 @@ function WikiElement:getTooltipImage(texture)
     -- fix path of the image
     local texturePath = string.gsub(texture:getName(), "^.*media", "media")
 
-    -- check if texturePath has spaces
-    if string.find(texturePath, " ") then
-        ---@TODO: make a proper custom texture rendered to handle texture drawing directly in the tooltip
-        return "" -- texture cannot show up with spaces in path
-    end
+    -- replace spaces with &WT_SPACE_PATTERN;
+    texturePath = string.gsub(texturePath, " ", "&WT_SPACE_PATTERN;")
+
+    -- -- check if texturePath has spaces
+    -- if string.find(texturePath, " ") then
+    --     ---@TODO: make a proper custom texture rendered to handle texture drawing directly in the tooltip
+    --     return "" -- texture cannot show up with spaces in path
+    -- end
 
     -- find proper texture size for the tooltip
     local ratio = width/height

@@ -2,10 +2,6 @@ require "ISUI/ISRichTextPanel"
 local originalProcessCommand = ISRichTextPanel.processCommand
 function ISRichTextPanel:processCommand(command, x, y, lineImageHeight, lineHeight)
     if string.find(command, "FLUIDBOXCENTRE:") then
-        -- local w = 50
-        -- local h = 50
-        -- local r,g,b = 1,1,1
-
         local prepare = string.split(command, ":")
         local split = string.split(prepare[2], ",")
 
@@ -14,20 +10,6 @@ function ISRichTextPanel:processCommand(command, x, y, lineImageHeight, lineHeig
         local r = tonumber(string.trim(split[3]))
         local g = tonumber(string.trim(split[4]))
         local b = tonumber(string.trim(split[5]))
-
-        -- if string.find(command, ",") ~= nil then
-        --     local vs = string.split(command, ",")
-        --     print(#vs)
-        --     for i=1,#vs do
-        --         print(vs[i])
-        --     end
-        --     command = string.trim(vs[1])
-        --     w = tonumber(string.trim(vs[2]))
-        --     h = tonumber(string.trim(vs[3]))
-        --     r = tonumber(string.trim(vs[4]))
-        --     g = tonumber(string.trim(vs[5]))
-        --     b = tonumber(string.trim(vs[6]))
-        -- end
 
         if(x + w >= self.width - (self.marginLeft + self.marginRight)) then
             x = 0
@@ -53,6 +35,7 @@ function ISRichTextPanel:processCommand(command, x, y, lineImageHeight, lineHeig
         y = y + h / 2
     end
 
+    command = string.gsub(command, "&WT_SPACE_PATTERN;", " ")
     return originalProcessCommand(self, command, x, y, lineImageHeight, lineHeight)
 end
 

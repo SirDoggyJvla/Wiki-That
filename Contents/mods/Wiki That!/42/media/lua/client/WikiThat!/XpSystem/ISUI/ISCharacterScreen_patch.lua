@@ -3,21 +3,9 @@ local patch = {}
 ---CACHE
 local WT = require "WikiThat!/module"
 require "WikiThat!/main"
-local WT_utility = require "WikiThat!/utility"
-local ISWikiThatContextMenu = require "WikiThat!/ISUI/ISWikiThatContextMenu"
 --WikiElements
 local WETrait = require "WikiThat!/Objects/WikiElements/WETrait"
 
-
-
-patch.traitContextMenu = ISWikiThatContextMenu:new(0,0,1,1,1.5) --[[@as ISWikiThatContextMenu]]
-
-WT.OnInitGlobalModData = function(_)
-    patch.traitContextMenu:initialise()
-    patch.traitContextMenu:addToUIManager()
-    patch.traitContextMenu:setVisible(false)
-    patch.traitContextMenu.keepOnScreen = false
-end
 
 ---@DEBUG
 local function printTable(tbl, maxLvl, _lvl)
@@ -35,7 +23,7 @@ end
 
 patch.onRightMouseDown = function(self, x, y)
     -- init context menu
-    local context = patch.traitContextMenu
+    local context = WT.ingameContextMenu --[[@as ISWikiThatContextMenu]]
     context = context:resetContextMenu(getMouseX(), getMouseY())
 
     -- populate context menu for wiki that
