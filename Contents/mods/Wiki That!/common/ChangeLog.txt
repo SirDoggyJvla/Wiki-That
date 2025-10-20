@@ -75,3 +75,10 @@ Fixed:
 - Removed cache system for WikiElement as it was causing issues and was not really needed
 
 [ ------ ]
+
+[ 10/20/25 ]
+1.5.1
+Fixed:
+- Files moved from 42 to 42.12 folder, thus old extra files I had left as a safeguard for users are now fully ignored. (thanks to albion's suggestion)
+
+[ ------ ]
