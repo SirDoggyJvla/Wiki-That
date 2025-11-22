@@ -27,6 +27,7 @@ return {
     ["Emaciated"] = "Emaciated",
     ["FastHealer"] = "Fast Healer",
     ["FastLearner"] = "Fast Learner",
+    ["weightloss"] = "Fast Metabolism",
     ["FastReader"] = "Fast Reader",
     ["Hemophobic"] = "Fear of Blood",
     ["FirstAid"] = "First Aider",

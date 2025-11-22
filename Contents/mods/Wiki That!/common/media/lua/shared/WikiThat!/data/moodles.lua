@@ -11,6 +11,7 @@ return {
     ["HasACold"] = "Has a cold",
     ["HeavyLoad"] = "Heavy load",
     ["Hungry"] = "Hungry",
+    ["FoodEaten"] = "Hungry",
     ["Hyperthermia"] = "Hyperthermia",
     ["Hypothermia"] = "Hypothermia",
     ["Injured"] = "Injured",
