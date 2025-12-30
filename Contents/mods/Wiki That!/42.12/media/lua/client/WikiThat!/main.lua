@@ -14,7 +14,6 @@ local WECrop = require "WikiThat!/Objects/WikiElements/WECrop"
 local WEMoodle = require "WikiThat!/Objects/WikiElements/WEMoodle"
 -- reset pool
 WT.tooltipPool = {}
-WT.tooltipsUsed = {}
 -- dictionaries
 local cropDictionary = require "WikiThat!/data/crops"
 
@@ -94,19 +93,13 @@ end
 ---@param context ISContextMenu
 ---@param items table
 WT.OnFillInventoryObjectContextMenu = function(playerIndex, context, items)
-    -- wipe tooltip pool
-    for _,tooltip in ipairs(WT.tooltipsUsed) do
-        table.insert(WT.tooltipPool, tooltip)
-    end
-    table.wipe(WT.tooltipsUsed)
-
     local uniqueItems = {}
 
 	for i = 1,#items do repeat -- repeat to have break act as a continue
 		-- retrieve a unique item, no need to check the ones of the same type
 		local item = items[i]
 		if not instanceof(item, "InventoryItem") then
-            item = item.items[1];
+            item = item.items[1]
         end
 
         -- check if item has media data
