@@ -1,8 +1,0 @@
-{
-    "IGUI_WikiThat": "Wiki That!",
-    "IGUI_WikiThat_Tooltip": "Open the wiki page of:<BR><BR>%s",
-    "IGUI_WikiThat_NoPage": "No wiki page found for %s.",
-    "IGUI_WikiThat_NoPage_noName": "No wiki page found.",
-    "IGUI_WikiThat_ModOptions_Pause": "Pause the game when opening a wiki page",
-    "IGUI_WikiThat_ModOptions_Browser": "Use external browser"
-}
