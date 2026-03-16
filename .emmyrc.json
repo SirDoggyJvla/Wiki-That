@@ -6,6 +6,9 @@
             "Contents/mods/Wiki That!/42.15/media/lua"
         ]
     },
+    "ignoreDir": [
+        "Contents/mods/Wiki That!/42.12"
+    ],
     "runtime": {
         "extensions": [],
         "frameworkVersions": [],
