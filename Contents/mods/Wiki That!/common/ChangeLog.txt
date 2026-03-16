@@ -82,3 +82,10 @@ Fixed:
 - Files moved from 42 to 42.12 folder, thus old extra files I had left as a safeguard for users are now fully ignored. (thanks to albion's suggestion)
 
 [ ------ ]
+
+[ 03/16/25 ]
+1.6.0
+Fixed:
+- Translation files for B42.15
+
+[ ------ ]
