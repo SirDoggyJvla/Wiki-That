@@ -4,11 +4,13 @@ Mod options
 
 ]]--
 
-local options = PZAPI.ModOptions:create("WikiThat", getText("IGUI_WikiThat"))
+local Translations = require "WikiThat!/translations"
+
+local options = PZAPI.ModOptions:create("WikiThat", getText(Translations.MAIN))
 -- options:addTitle("Wiki That!")
 -- options:addSeparator()
-local OPTION_PAUSE = options:addTickBox("WikiThat_Pause", getText("IGUI_WikiThat_ModOptions_Pause"), true)
-local OPTION_BROWSER = options:addTickBox("WikiThat_Browser", getText("IGUI_WikiThat_ModOptions_Browser"), false)
+local OPTION_PAUSE = options:addTickBox("WikiThat_Pause", getText(Translations.MODOPTIONS_PAUSE), true)
+local OPTION_BROWSER = options:addTickBox("WikiThat_Browser", getText(Translations.MODOPTIONS_BROWSER), false)
 
 return {
     __options__ = options,

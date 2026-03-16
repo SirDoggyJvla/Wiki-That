@@ -134,7 +134,7 @@ end
 ---Handle context menu for animals.
 ---@param playerIndex integer
 ---@param context ISContextMenu
----@param animals table<IsoAnimal>
+---@param animals IsoAnimal[]
 WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
     for i = 1,#animals do
         local animal = animals[i] --[[@as IsoAnimal]]
@@ -173,7 +173,7 @@ end
 ---The events used are `OnClickedAnimalForContext` and a hook to `ISVehicleMenu.FillMenuOutsideVehicle` which trigger before, to store the relevant other objects.
 ---@param playerNum integer
 ---@param context ISContextMenu
----@param worldObjects table<IsoObject>
+---@param worldObjects IsoObject[]
 ---@param test boolean
 WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, test)
     local objects = {}

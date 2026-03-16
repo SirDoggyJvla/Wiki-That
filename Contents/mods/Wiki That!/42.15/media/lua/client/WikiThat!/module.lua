@@ -1,3 +1,5 @@
+---@namespace WikiThat
+
 ---@alias URL string
 ---@alias PageName string
 ---@alias ForageCategory table
@@ -5,6 +7,7 @@
 
 local ISWikiThatContextMenu = require "WikiThat!/ISUI/ISWikiThatContextMenu"
 
+---@type table
 local WT = {
     backgroundColor_highlight = {r=0.48, g=0.07, b=0.09, a=1},
     backgroundColor_normal = {r=0.29, g=0.05, b=0.05, a=1},
@@ -14,6 +17,7 @@ local WT = {
     selectedVehicles = {},
     selectedAnimals = {},
 
+    ---@type ISWikiThatContextMenu
     ingameContextMenu = ISWikiThatContextMenu:new(0,0,1,1,1.5), --[[@as ISWikiThatContextMenu]]
 }
 

@@ -1,6 +1,10 @@
+---@namespace WikiThat
+
 ---CACHE
 local WT = require "WikiThat!/module"
 local WT_utility = require "WikiThat!/utility"
+local Translations = require "WikiThat!/translations"
+local Utils = require "WikiThat!/utils"
 -- wiki elements
 local WikiElement = require "WikiThat!/Objects/WikiElement"
 local WEInventoryItem = require "WikiThat!/Objects/WikiElements/WEInventoryItem"
@@ -134,9 +138,9 @@ end
 ---Handle context menu for animals.
 ---@param playerIndex integer
 ---@param context ISContextMenu
----@param animals table<IsoAnimal>
+---@param animals IsoAnimal[]
 WT.OnClickedAnimalForContext = function(playerIndex, context, animals, _)
-    for i = 1,#animals do
+    for i = 1, #animals do
         local animal = animals[i] --[[@as IsoAnimal]]
         table.insert(WT.selectedAnimals, animal) -- store for use in the world object context menu
     end
@@ -144,7 +148,7 @@ end
 
 ---Handle context menu for foraging search icons.
 ---@param context ISContextMenu
----@param icon ISBaseIcon
+---@param icon ISForageIcon
 WT.onFillSearchIconContextMenu = function(context, icon)
     ---@TODO: are these checks needed ? Was from my hunting mod
     -- verify it's valid
@@ -155,7 +159,7 @@ WT.onFillSearchIconContextMenu = function(context, icon)
 
     -- item to forage
     local itemType = icon.itemType
-    local item = getScriptManager():FindItem(itemType)
+    local item = getScriptManager():FindItem(itemType) ---@diagnostic disable-line
 
     -- category to forage
     local catDef = icon.catDef
@@ -173,7 +177,7 @@ end
 ---The events used are `OnClickedAnimalForContext` and a hook to `ISVehicleMenu.FillMenuOutsideVehicle` which trigger before, to store the relevant other objects.
 ---@param playerNum integer
 ---@param context ISContextMenu
----@param worldObjects table<IsoObject>
+---@param worldObjects IsoObject[]
 ---@param test boolean
 WT.OnFillWorldObjectContextMenu = function(playerNum, context, worldObjects, test)
     local objects = {}
@@ -271,7 +275,9 @@ WT.populateDictionary = function(context, uniqueEntries)
 
     -- handle no entry case, we still want to show Wiki That in the menu
     if entryCount <= 0 then
-        uniqueEntries["__EMPTY__"] = WikiElement:new(nil, nil, "__EMPTY__")
+        ---@diagnostic disable-next-line
+        wikiElement = WikiElement:new(nil, nil, "__EMPTY__")
+        uniqueEntries["__EMPTY__"] = wikiElement
         entryCount = 1
     end
 
@@ -282,13 +288,14 @@ WT.populateDictionary = function(context, uniqueEntries)
         for _,v in pairs(uniqueEntries) do
             wikiElement = v
         end
+        ---@cast wikiElement WikiElement
         WT.createOptionEntry(context, wikiElement, true)
 
         return
     end
 
     -- main option
-    local optionMain = context:addOption(getText("IGUI_WikiThat"))
+    local optionMain = context:addOption(getText(Translations.MAIN))
     optionMain.iconTexture = WT_utility.getOptionIcon(nil, true)
     local subMenu = context:getNew(context)
     context:addSubMenu(optionMain, subMenu)
@@ -312,7 +319,7 @@ WT.createOptionEntry = function(context, wikiElement, _isMain)
     local icon = WT_utility.getOptionIcon(wikiElement, _isMain)
 
     -- create option
-    local optionName = _isMain and getText("IGUI_WikiThat") or displayName or wikiElement.type
+    local optionName = _isMain and getText(Translations.MAIN) or displayName or wikiElement.type
     local option = context:addOption(optionName, wikiElement, wikiElement.openWikiPage) --[[@as table]]
 
     -- special case for fluids to show a fluid icon with the fluid color
@@ -331,9 +338,12 @@ WT.createOptionEntry = function(context, wikiElement, _isMain)
     if not pageName then
         local text
         if displayName then
-            text = string.format(getText("IGUI_WikiThat_NoPage"), displayName)
+            text = Utils.formatTemplate(
+                getText(Translations.NO_PAGE),
+                {entry = displayName}
+            )
         else -- case where entry can't have a name (burnt vehicles without names for example)
-            text = getText("IGUI_WikiThat_NoPage_noName")
+            text = getText(Translations.NO_PAGE_NO_NAME)
         end
         -- update tooltip
         if tooltipObject then tooltipObject.description = text end

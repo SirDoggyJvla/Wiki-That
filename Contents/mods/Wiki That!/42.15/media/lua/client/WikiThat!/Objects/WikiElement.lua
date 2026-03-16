@@ -1,3 +1,5 @@
+---@namespace WikiThat
+
 ---Default class for a wikable element. This is used to store the object, its type, class and retrieve its wiki page, name and icon. It also retrieves the tooltip of the object and opens the wiki page if needed.
 ---@TODO: ability for modders to easily create their own WikiElement class for custom objects.
 ---
@@ -15,6 +17,8 @@ local WikiElement = ISBaseObject:derive("WikiElement")
 
 ---CACHE
 local WT_options = require "WikiThat!/modOptions"
+local Translations = require "WikiThat!/translations"
+local Utils = require "WikiThat!/utils"
 -- data
 local itemDictionary = require "WikiThat!/data/items"
 local fluidDictionary = require "WikiThat!/data/fluids"
@@ -127,7 +131,10 @@ function WikiElement:getTooltip()
     -- retrieve tooltip text
     local s = self:getTooltipContent()
 
-    tooltipObject.description = string.format(getText("IGUI_WikiThat_Tooltip"), s)
+    tooltipObject.description = Utils.formatTemplate(
+        getText(Translations.TOOLTIP),
+        {entry = s}
+    )
 
     return tooltipObject
 end

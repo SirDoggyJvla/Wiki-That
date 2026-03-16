@@ -1,12 +1,6 @@
---[[
+---@namespace WikiThat
 
-Utility functions
-
-]]--
 local WT_utility = {}
-
----CACHE
-local WT_options = require "WikiThat!/modOptions"
 
 ---Utility to count entries in a dictionary (key-table).
 ---@param dict table
@@ -95,7 +89,7 @@ WT_utility.getWorldItem = function(object)
     -- access item properties and get the item fullType
     local containerProperties = object:getProperties()
     if not containerProperties then return end
-    local fullType = containerProperties:Val("CustomItem")
+    local fullType = containerProperties:get("CustomItem")
     if not fullType then return end
 
     -- get the item script

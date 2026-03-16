@@ -1,3 +1,5 @@
+---@namespace WikiThat
+
 local utils = {}
 
 ---Formats translation entries that use such a format:
