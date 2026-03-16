@@ -1,0 +1,8 @@
+{
+    "IGUI_WikiThat": "Wiki That!",
+    "IGUI_WikiThat_Tooltip": "Şunun wiki sayfasını aç:<BR><BR>%s",
+    "IGUI_WikiThat_NoPage": "%s için wiki sayfası bulunamadı.",
+    "IGUI_WikiThat_NoPage_noName": "Wiki sayfası bulunamadı.",
+    "IGUI_WikiThat_ModOptions_Pause": "Wiki sayfası açarken oyunu durdur",
+    "IGUI_WikiThat_ModOptions_Browser": "Harici tarayıcı kullan"
+}
