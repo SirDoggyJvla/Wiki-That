@@ -1,5 +1,8 @@
 set -e
 
+VERSION="${1:?Usage: ./publish.sh <version> [gh-options]}"
+shift || true
+
 # make sure main branch is being uploaded
 git checkout main
 git pull
@@ -20,10 +23,10 @@ cd $STEAMUPLOADER
     --preview "$WORKSHOP_DIR/Wiki That! - preview.png" \
     --title "$MOD_TITLE" --visibility "$VISIBILITY" --tags "$TAGS"
 
-cd $WORKSHOP_DIR
+cd $WORKSHOP_DIR/Contents
 
 ARCHIVE="/tmp/release.zip"
-zip -r "$ARCHIVE" Contents/mods
+zip -r "$ARCHIVE" mods
 
 gh release create "$VERSION" "$ARCHIVE" \
     --notes "$VERSION" \
