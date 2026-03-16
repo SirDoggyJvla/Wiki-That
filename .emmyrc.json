@@ -3,7 +3,7 @@
     "workspace": {
         "library": ["$PZ_UMBRELLA"],
         "workspaceRoots": [
-            "Contents/mods/Wiki That!/42/media/lua"
+            "Contents/mods/Wiki That!/42.15/media/lua"
         ]
     },
     "runtime": {
